@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
 import { ArtistsView } from './components/ArtistsView';
 import { TimetableView } from './components/TimetableView';
+import { InstallPrompt } from './components/InstallPrompt';
 
 export const App: React.FC = () => {
   const { activeTab } = useStore();
@@ -54,6 +55,7 @@ export const App: React.FC = () => {
       </main>
 
       <Navbar />
+      <InstallPrompt />
     </div>
   );
 };

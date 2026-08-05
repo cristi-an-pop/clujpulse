@@ -5,12 +5,13 @@ import type { ArtistSet, Stage } from '../types';
 import { useCurrentTime } from '../hooks/useCurrentTime';
 import { timeToMinutes, checkSetClash } from '../utils/clashDetection';
 import { WallpaperExporter } from './WallpaperExporter';
-import { AlertTriangle, Download } from 'lucide-react';
+import { AlertTriangle, Sparkles } from 'lucide-react';
+import { Modal } from './Modal';
 
-const HOUR_WIDTH = 200;
-const ROW_HEIGHT = 96;
-const HOURS = Array.from({ length: 13 }, (_, i) => (18 + i) % 24);
-const GRID_END = 720;
+const HOUR_WIDTH = 180;
+const ROW_HEIGHT = 100;
+const HOURS = Array.from({ length: 15 }, (_, i) => (16 + i) % 24);
+const GRID_END = 840;
 
 function minutesToGridX(minutes: number): number {
   return (minutes / 60) * HOUR_WIDTH;
@@ -29,6 +30,7 @@ export const TimetableView: React.FC = () => {
   const currentMinutes = useCurrentTime();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   const myFavorites = useMemo(() => {
     return ARTIST_SETS.filter(s => favoriteIds.includes(s.id));
@@ -59,7 +61,7 @@ export const TimetableView: React.FC = () => {
     }
   }, []);
 
-  const gridWidth = 13 * HOUR_WIDTH;
+  const gridWidth = 15 * HOUR_WIDTH;
 
   return (
     <div className="w-full pb-20">
@@ -72,10 +74,10 @@ export const TimetableView: React.FC = () => {
           </h1>
           <button
             onClick={() => setIsWallpaperModalOpen(true)}
-            className="flex items-center gap-2 text-xs font-mono text-ink-3 hover:text-ink transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-display font-bold bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-colors"
           >
-            <Download className="w-3.5 h-3.5" />
-            Export lock screen
+            <Sparkles className="w-3.5 h-3.5" />
+            Save as Lock Screen
           </button>
         </div>
 
@@ -107,7 +109,7 @@ export const TimetableView: React.FC = () => {
 
           {timetableMode === 'my-lineup' && myFavorites.length > 0 && (
             <button
-              onClick={() => { if (window.confirm("Clear your lineup?")) clearFavorites(); }}
+              onClick={() => setShowClearModal(true)}
               className="ml-auto text-xs font-mono text-danger"
             >
               clear
@@ -284,6 +286,26 @@ export const TimetableView: React.FC = () => {
         onClose={() => setIsWallpaperModalOpen(false)}
         day={selectedDayFilter !== 0 ? selectedDayFilter : activeDay}
       />
+
+      <Modal isOpen={showClearModal} onClose={() => setShowClearModal(false)} title="Clear lineup?">
+        <p className="text-sm text-ink-2 mb-5">
+          This removes all {myFavorites.length} artists from your picks. You can always re-add them.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => { clearFavorites(); setShowClearModal(false); }}
+            className="flex-1 py-3 rounded-full text-sm font-display font-bold bg-danger/20 text-danger border border-danger/30"
+          >
+            Clear all
+          </button>
+          <button
+            onClick={() => setShowClearModal(false)}
+            className="flex-1 py-3 rounded-full text-sm font-display font-bold text-ink-2 border border-rule"
+          >
+            Keep
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 };

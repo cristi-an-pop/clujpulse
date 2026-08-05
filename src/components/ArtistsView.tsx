@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { ARTIST_SETS, STAGES } from '../data/scheduleData';
-import { useCurrentTime } from '../hooks/useCurrentTime';
+import { useCurrentTime, useFestivalDay } from '../hooks/useCurrentTime';
 import { timeToMinutes } from '../utils/clashDetection';
 import { ArtistCard } from './ArtistCard';
 import { Search, X } from 'lucide-react';
@@ -10,11 +10,11 @@ export const ArtistsView: React.FC = () => {
   const {
     searchQuery, setSearchQuery,
     selectedDayFilter, setSelectedDayFilter,
-    selectedStageFilter, setSelectedStageFilter,
-    activeDay
+    selectedStageFilter, setSelectedStageFilter
   } = useStore();
 
   const currentMinutes = useCurrentTime();
+  const festivalDay = useFestivalDay();
 
   const filteredSets = useMemo(() => {
     return ARTIST_SETS.filter((set) => {
@@ -32,15 +32,14 @@ export const ArtistsView: React.FC = () => {
   }, [searchQuery, selectedDayFilter, selectedStageFilter]);
 
   const playingNow = useMemo(() => {
-    if (currentMinutes < 0) return [];
-    const dayToInspect = selectedDayFilter !== 0 ? selectedDayFilter : activeDay;
+    if (currentMinutes < 0 || !festivalDay) return [];
     return ARTIST_SETS.filter(s => {
-      if (s.day !== dayToInspect) return false;
+      if (s.day !== festivalDay) return false;
       const start = timeToMinutes(s.startTime);
       const end = timeToMinutes(s.endTime);
       return start <= currentMinutes && end > currentMinutes;
     });
-  }, [selectedDayFilter, activeDay, currentMinutes]);
+  }, [festivalDay, currentMinutes]);
 
   return (
     <div className="w-full pb-20">
