@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: oklch(9% 0.025 285);
+  --color-paper-2: oklch(13% 0.03 285);
+  --color-paper-3: oklch(18% 0.025 285);
+  --color-ink: oklch(97% 0.005 290);
+  --color-ink-2: oklch(58% 0.012 290);
+  --color-ink-3: oklch(35% 0.01 290);
+  --color-rule: oklch(16% 0.02 290);
+  --color-accent: oklch(62% 0.26 290);
+  --color-accent-soft: oklch(12% 0.06 290);
+  --color-focus: oklch(72% 0.22 290);
+  --color-success: oklch(72% 0.19 155);
+  --color-success-soft: oklch(12% 0.05 155);
+  --color-warning: oklch(80% 0.16 70);
+  --color-danger: oklch(65% 0.22 25);
+  --color-danger-soft: oklch(12% 0.05 25);
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Geist", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html, body {
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    font-weight: 350;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: oklch(62% 0.26 290 / 0.4);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 150ms !important;
+  }
+}

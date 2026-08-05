@@ -1,0 +1,12 @@
+[
+  {
+    "date": "2026-08-05",
+    "macrostructure": "App Shell (tab-bar + content)",
+    "theme": "custom",
+    "theme_axes": "dark / grotesk-sans / cool-violet",
+    "vibe": "festival utility, dark restraint",
+    "enrichment": "none",
+    "scope": "app",
+    "brief": "ClujPulse — UNTOLD '26 festival companion PWA, artists + timetable"
+  }
+]
