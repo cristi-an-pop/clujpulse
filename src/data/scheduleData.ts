@@ -2,6 +2,18 @@ import type { Stage, ArtistSet } from '../types';
 
 export const STAGES: Stage[] = [
   {
+    id: "main",
+    name: "Main",
+    color: "#38bdf8",
+    description: "Magician's Temple",
+  },
+  {
+    id: "galaxy",
+    name: "Galaxy",
+    color: "#a855f7",
+    description: "The Cosmic Rhythms",
+  },
+  {
     id: "alchemy",
     name: "Alchemy",
     color: "#f43f5e",
@@ -14,36 +26,6 @@ export const STAGES: Stage[] = [
     description: "Head Trip",
   },
   {
-    id: "form",
-    name: "FORM",
-    color: "#6366f1",
-    description: "Hypnotic State",
-  },
-  {
-    id: "galaxy",
-    name: "Galaxy",
-    color: "#a855f7",
-    description: "The Cosmic Rhythms",
-  },
-  {
-    id: "main",
-    name: "Main",
-    color: "#38bdf8",
-    description: "Magician's Temple",
-  },
-  {
-    id: "retro",
-    name: "Retro",
-    color: "#ec4899",
-    description: "Remembrance",
-  },
-  {
-    id: "soul_circle",
-    name: "Soul Circle",
-    color: "#14b8a6",
-    description: "Soulful magic rises",
-  },
-  {
     id: "time",
     name: "Time",
     color: "#fbbf24",
@@ -54,7 +36,25 @@ export const STAGES: Stage[] = [
     name: "Tram",
     color: "#f97316",
     description: "Your musical Journey",
-  }
+  },
+  {
+    id: "retro",
+    name: "Retro",
+    color: "#ec4899",
+    description: "Remembrance",
+  },
+  {
+    id: "form",
+    name: "FORM",
+    color: "#6366f1",
+    description: "Hypnotic State",
+  },
+  {
+    id: "soul_circle",
+    name: "Soul Circle",
+    color: "#14b8a6",
+    description: "Soulful magic rises",
+  },
 ];
 
 export const ARTIST_SETS: ArtistSet[] = [

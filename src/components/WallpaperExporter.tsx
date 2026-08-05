@@ -52,8 +52,11 @@ export const WallpaperExporter: React.FC<Props> = ({ isOpen, onClose, day }) => 
     ctx.fillRect(80, 260, width - 160, 1);
 
     let startY = 320;
-    const cardHeight = 140;
-    const gap = 20;
+    const availableHeight = height - startY - 120;
+    const maxItems = dayFavorites.length;
+    const gap = maxItems > 12 ? 8 : maxItems > 8 ? 12 : 20;
+    const cardHeight = Math.min(140, Math.floor((availableHeight - gap * (maxItems - 1)) / maxItems));
+    const isCompact = cardHeight < 90;
 
     if (dayFavorites.length === 0) {
       ctx.fillStyle = '#71717a';
@@ -61,33 +64,45 @@ export const WallpaperExporter: React.FC<Props> = ({ isOpen, onClose, day }) => 
       ctx.fillText('No artists in your lineup for this day.', 80, startY + 80);
     } else {
       dayFavorites.forEach((set) => {
-        if (startY + cardHeight > height - 120) return;
+        if (startY + cardHeight > height - 80) return;
 
         const stage = STAGES.find((s) => s.id === set.stageId) || { name: 'Stage', color: '#8b5cf6' };
 
         ctx.fillStyle = '#1c1926';
         ctx.beginPath();
-        ctx.roundRect(80, startY, width - 160, cardHeight, 12);
+        ctx.roundRect(80, startY, width - 160, cardHeight, 10);
         ctx.fill();
 
         ctx.fillStyle = stage.color;
         ctx.beginPath();
-        ctx.roundRect(80, startY, 4, cardHeight, [12, 0, 0, 12]);
+        ctx.roundRect(80, startY, 4, cardHeight, [10, 0, 0, 10]);
         ctx.fill();
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '600 44px sans-serif';
-        ctx.fillText(set.artistName, 120, startY + 58);
+        if (isCompact) {
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '600 34px sans-serif';
+          ctx.fillText(set.artistName, 120, startY + cardHeight / 2 + 5);
 
-        ctx.fillStyle = '#a1a1aa';
-        ctx.font = '400 32px sans-serif';
-        ctx.fillText(`${stage.name}`, 120, startY + 105);
+          const timeStr = `${set.startTime}–${set.endTime}`;
+          ctx.fillStyle = '#71717a';
+          ctx.font = '400 26px monospace';
+          const timeWidth = ctx.measureText(timeStr).width;
+          ctx.fillText(timeStr, width - 120 - timeWidth, startY + cardHeight / 2 + 5);
+        } else {
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '600 44px sans-serif';
+          ctx.fillText(set.artistName, 120, startY + 58);
 
-        const timeStr = `${set.startTime} – ${set.endTime}`;
-        ctx.font = '500 32px monospace';
-        const timeWidth = ctx.measureText(timeStr).width;
-        ctx.fillStyle = '#71717a';
-        ctx.fillText(timeStr, width - 120 - timeWidth, startY + 105);
+          ctx.fillStyle = '#a1a1aa';
+          ctx.font = '400 32px sans-serif';
+          ctx.fillText(`${stage.name}`, 120, startY + 105);
+
+          const timeStr = `${set.startTime}–${set.endTime}`;
+          ctx.font = '500 28px monospace';
+          const timeWidth = ctx.measureText(timeStr).width;
+          ctx.fillStyle = '#71717a';
+          ctx.fillText(timeStr, width - 120 - timeWidth, startY + 105);
+        }
 
         startY += cardHeight + gap;
       });

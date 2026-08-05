@@ -5,7 +5,7 @@ import type { ArtistSet, Stage } from '../types';
 import { useCurrentTime } from '../hooks/useCurrentTime';
 import { timeToMinutes, checkSetClash } from '../utils/clashDetection';
 import { WallpaperExporter } from './WallpaperExporter';
-import { AlertTriangle, Sparkles } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { Modal } from './Modal';
 
 const HOUR_WIDTH = 180;
@@ -74,10 +74,9 @@ export const TimetableView: React.FC = () => {
           </h1>
           <button
             onClick={() => setIsWallpaperModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-display font-bold bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-display font-bold text-ink-2 border border-rule hover:text-ink hover:border-ink-3 transition-colors"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            Save as Lock Screen
+            Save as Lock Screen →
           </button>
         </div>
 
@@ -185,94 +184,88 @@ export const TimetableView: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="mt-2">
-          <div ref={scrollRef} className="overflow-x-auto no-scrollbar">
-            <div style={{ width: gridWidth + 180 }} className="min-w-full">
-
-              {/* Time header */}
-              <div className="flex sticky top-[57px] bg-paper/90 backdrop-blur-md z-10 border-b border-rule/30">
-                <div className="w-[180px] shrink-0" />
-                <div className="flex relative">
-                  {HOURS.map((hour, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-start px-4 py-3"
-                      style={{ width: HOUR_WIDTH }}
-                    >
-                      <span className="text-xs font-mono text-ink-3">
-                        {hour.toString().padStart(2, '0')}:00
-                      </span>
-                    </div>
-                  ))}
-                  {currentMinutes >= 0 && currentMinutes <= GRID_END && (
-                    <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent to-accent/0 z-20"
-                      style={{ left: minutesToGridX(currentMinutes) }}
-                    >
-                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-accent shadow-[0_0_10px_var(--color-accent)]" />
-                    </div>
-                  )}
+        <div className="mt-2 flex">
+          {/* Sticky stage names column */}
+          <div className="shrink-0 w-[140px] z-20 bg-paper">
+            {/* Header spacer */}
+            <div className="h-10 border-b border-rule/30" />
+            {/* Stage labels */}
+            {visibleStages.map((stage, stageIdx) => {
+              const stageSets = displayedSets.filter(s => s.stageId === stage.id);
+              return (
+                <div
+                  key={stage.id}
+                  className="flex flex-col justify-center gap-1 px-5"
+                  style={{
+                    height: ROW_HEIGHT,
+                    borderBottom: stageIdx < visibleStages.length - 1 ? '1px solid oklch(16% 0.02 290 / 0.3)' : 'none'
+                  }}
+                >
+                  <span className="text-base font-display font-bold tracking-tight" style={{ color: stage.color }}>
+                    {stage.name}
+                  </span>
+                  <span className="text-[11px] font-mono text-ink-3">
+                    {stageSets.length} set{stageSets.length !== 1 ? 's' : ''}
+                  </span>
                 </div>
+              );
+            })}
+          </div>
+
+          {/* Scrollable timeline */}
+          <div ref={scrollRef} className="flex-1 overflow-x-auto no-scrollbar">
+            <div style={{ width: gridWidth }}>
+              {/* Time header */}
+              <div className="flex h-10 border-b border-rule/30 sticky top-[57px] bg-paper/90 backdrop-blur-md z-10 relative">
+                {HOURS.map((hour, i) => (
+                  <div key={i} className="flex items-center px-3" style={{ width: HOUR_WIDTH }}>
+                    <span className="text-[11px] font-mono text-ink-3">
+                      {hour.toString().padStart(2, '0')}:00
+                    </span>
+                  </div>
+                ))}
+                {currentMinutes >= 0 && currentMinutes <= GRID_END && (
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5 bg-accent z-20"
+                    style={{ left: minutesToGridX(currentMinutes) }}
+                  >
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-accent shadow-[0_0_8px_var(--color-accent)]" />
+                  </div>
+                )}
               </div>
 
               {/* Stage rows */}
               {visibleStages.map((stage, stageIdx) => {
                 const stageSets = displayedSets.filter(s => s.stageId === stage.id);
-
                 return (
                   <div
                     key={stage.id}
-                    className="flex group/row"
-                    style={{ borderBottom: stageIdx < visibleStages.length - 1 ? '1px solid oklch(16% 0.02 290 / 0.5)' : 'none' }}
+                    className="relative"
+                    style={{
+                      height: ROW_HEIGHT,
+                      borderBottom: stageIdx < visibleStages.length - 1 ? '1px solid oklch(16% 0.02 290 / 0.3)' : 'none'
+                    }}
                   >
-                    {/* Stage label */}
-                    <div className="w-[180px] shrink-0 px-6 flex flex-col justify-center gap-1.5">
-                      <span
-                        className="text-lg font-display font-bold tracking-tight"
-                        style={{ color: stage.color }}
-                      >
-                        {stage.name}
-                      </span>
-                      <span className="text-xs font-mono text-ink-3">
-                        {stageSets.length} set{stageSets.length !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-
-                    {/* Timeline */}
-                    <div className="relative flex-1" style={{ height: ROW_HEIGHT }}>
-                      {/* Subtle hour markers */}
-                      {HOURS.map((_, i) => (
-                        <div
-                          key={i}
-                          className="absolute top-4 bottom-4 w-px bg-rule/30"
-                          style={{ left: i * HOUR_WIDTH }}
-                        />
-                      ))}
-
-                      {/* Artist blocks */}
-                      {stageSets.map((set) => (
-                        <SetBlock
-                          key={set.id}
-                          set={set}
-                          stage={stage}
-                          isFavorited={favoriteIds.includes(set.id)}
-                          onToggle={() => toggleFavorite(set.id)}
-                          clashInfo={
-                            favoriteIds.includes(set.id) && timetableMode === 'my-lineup'
-                              ? checkSetClash(set, myFavorites)
-                              : null
-                          }
-                        />
-                      ))}
-
-                      {/* Now line */}
-                      {currentMinutes >= 0 && currentMinutes <= GRID_END && (
-                        <div
-                          className="absolute top-0 bottom-0 w-px bg-accent/20"
-                          style={{ left: minutesToGridX(currentMinutes) }}
-                        />
-                      )}
-                    </div>
+                    {HOURS.map((_, i) => (
+                      <div key={i} className="absolute top-4 bottom-4 w-px bg-rule/20" style={{ left: i * HOUR_WIDTH }} />
+                    ))}
+                    {stageSets.map((set) => (
+                      <SetBlock
+                        key={set.id}
+                        set={set}
+                        stage={stage}
+                        isFavorited={favoriteIds.includes(set.id)}
+                        onToggle={() => toggleFavorite(set.id)}
+                        clashInfo={
+                          favoriteIds.includes(set.id) && timetableMode === 'my-lineup'
+                            ? checkSetClash(set, myFavorites)
+                            : null
+                        }
+                      />
+                    ))}
+                    {currentMinutes >= 0 && currentMinutes <= GRID_END && (
+                      <div className="absolute top-0 bottom-0 w-px bg-accent/20" style={{ left: minutesToGridX(currentMinutes) }} />
+                    )}
                   </div>
                 );
               })}
