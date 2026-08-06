@@ -50,7 +50,7 @@ export const ArtistsView: React.FC = () => {
           Artists
         </h1>
         <p className="text-base text-ink-2 mt-4 max-w-md">
-          {filteredSets.length} artists across {STAGES.length} stages. Tap to build your lineup.
+          {filteredSets.length} artists across {STAGES.length} stages.
         </p>
       </div>
 
