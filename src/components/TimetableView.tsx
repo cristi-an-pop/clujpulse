@@ -113,7 +113,7 @@ export const TimetableView: React.FC = () => {
               onClick={() => { setSelectedDayFilter(d.val); setActiveDay(d.val); }}
               className={`px-5 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
                 (selectedDayFilter === d.val || (selectedDayFilter === 0 && activeDay === d.val))
-                  ? 'bg-paper-3 text-ink border border-ink-2/30' : 'text-ink-2'
+                  ? 'bg-ink text-paper' : 'text-ink-2'
               }`}
             >
               {d.label}
@@ -130,8 +130,8 @@ export const TimetableView: React.FC = () => {
         </button>
       </div>
 
-      {/* Sticky bar — stage + zoom only */}
-      <div className="sticky top-[49px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center justify-between gap-3">
+      {/* Sticky bar — stage + zoom */}
+      <div className="sticky top-[48px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center justify-between gap-3">
         <StageSelector />
         <div className="flex items-center gap-1 bg-paper-2 rounded-full border border-ink-2/20 px-1.5 py-1">
           <button

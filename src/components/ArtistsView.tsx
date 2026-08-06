@@ -56,8 +56,7 @@ export const ArtistsView: React.FC = () => {
       )}
 
       {/* Top section — not sticky */}
-      <div className="px-5 pt-6 pb-4 space-y-4">
-        {/* Day selector */}
+      <div className="px-5 pt-5 pb-4">
         <div className="flex gap-2">
           {[
             { label: 'All', val: 0 },
@@ -69,9 +68,9 @@ export const ArtistsView: React.FC = () => {
             <button
               key={d.val}
               onClick={() => setSelectedDayFilter(d.val)}
-              className={`px-4 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
+              className={`px-5 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
                 selectedDayFilter === d.val
-                  ? 'bg-paper-3 text-ink border border-ink-2/30' : 'text-ink-2'
+                  ? 'bg-ink text-paper' : 'text-ink-2'
               }`}
             >
               {d.label}
@@ -81,7 +80,7 @@ export const ArtistsView: React.FC = () => {
       </div>
 
       {/* Sticky bar — stage + search */}
-      <div className="sticky top-[49px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center gap-3">
+      <div className="sticky top-[48px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center gap-3">
         <StageSelector />
 
         <div className="relative flex-1 max-w-xs ml-auto">
