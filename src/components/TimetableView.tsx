@@ -5,10 +5,10 @@ import type { ArtistSet, Stage } from '../types';
 import { useCurrentTime } from '../hooks/useCurrentTime';
 import { timeToMinutes, checkSetClash } from '../utils/clashDetection';
 import { WallpaperExporter } from './WallpaperExporter';
-import { AlertTriangle, ZoomIn, ZoomOut } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import { Modal } from './Modal';
 
-const ZOOM_LEVELS = [140, 180, 240, 320];
+const ZOOM_LEVELS = [180, 240, 320, 420];
 const ROW_HEIGHT = 80;
 const HOURS = Array.from({ length: 15 }, (_, i) => (16 + i) % 24);
 const GRID_END = 840;
@@ -31,7 +31,7 @@ export const TimetableView: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
-  const [zoomIdx, setZoomIdx] = useState(1);
+  const [zoomIdx, setZoomIdx] = useState(2);
 
   const hourWidth = ZOOM_LEVELS[zoomIdx];
 
@@ -134,20 +134,23 @@ export const TimetableView: React.FC = () => {
             </div>
 
             {/* Zoom */}
-            <div className="flex items-center gap-1 ml-auto">
+            <div className="flex items-center gap-0.5 ml-auto bg-paper-2 border border-ink-2/20 rounded-full px-1 py-1">
               <button
                 onClick={() => setZoomIdx(Math.max(0, zoomIdx - 1))}
                 disabled={zoomIdx === 0}
-                className="p-2 rounded-full text-ink-2 hover:text-ink disabled:opacity-30 transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-display font-bold text-ink-2 hover:text-ink disabled:opacity-30 transition-colors"
               >
-                <ZoomOut className="w-4 h-4" />
+                <Minus className="w-3.5 h-3.5" />
               </button>
+              <span className="text-xs font-mono text-ink-2 px-2">
+                {['S', 'M', 'L', 'XL'][zoomIdx]}
+              </span>
               <button
                 onClick={() => setZoomIdx(Math.min(ZOOM_LEVELS.length - 1, zoomIdx + 1))}
                 disabled={zoomIdx === ZOOM_LEVELS.length - 1}
-                className="p-2 rounded-full text-ink-2 hover:text-ink disabled:opacity-30 transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-display font-bold text-ink-2 hover:text-ink disabled:opacity-30 transition-colors"
               >
-                <ZoomIn className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -310,28 +313,29 @@ function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: S
   return (
     <div
       onClick={onToggle}
-      className={`absolute top-2 bottom-2 rounded-lg flex items-center px-3 gap-2 cursor-pointer overflow-hidden transition-all hover:brightness-110 ${
-        hasClash ? 'ring-2 ring-danger ring-offset-1 ring-offset-paper' : ''
-      }`}
+      className="absolute top-2 bottom-2 rounded-lg flex flex-col justify-center px-3 cursor-pointer overflow-hidden transition-all hover:brightness-110"
       style={{
         left,
         width: Math.max(width, 50),
         backgroundColor: isFavorited ? stage.color : `${stage.color}18`,
         color: isFavorited ? '#080612' : '#e4e4e7',
         boxShadow: isFavorited ? `0 2px 12px ${stage.color}30` : 'none',
-        border: `1px solid ${isFavorited ? stage.color : stage.color + '50'}`,
+        border: hasClash ? '2px solid var(--color-danger)' : `1px solid ${isFavorited ? stage.color : stage.color + '50'}`,
       }}
       title={`${set.artistName} · ${set.startTime}–${set.endTime}`}
     >
-      {hasClash && <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-danger" />}
-      <span className="text-[13px] font-display font-bold truncate tracking-tight">
+      <span className="text-[13px] font-display font-bold truncate tracking-tight leading-tight">
         {set.artistName}
       </span>
-      {width > 140 && (
-        <span className="text-[11px] font-mono opacity-50 shrink-0 ml-auto">
-          {set.startTime}
+      {hasClash ? (
+        <span className="text-[10px] font-display font-bold text-danger mt-0.5 truncate">
+          OVERLAP
         </span>
-      )}
+      ) : width > 140 ? (
+        <span className="text-[11px] font-mono opacity-50 mt-0.5">
+          {set.startTime}–{set.endTime}
+        </span>
+      ) : null}
     </div>
   );
 }
