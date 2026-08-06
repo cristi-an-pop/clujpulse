@@ -124,7 +124,7 @@ export const TimetableView: React.FC = () => {
       </div>
 
       {/* Sticky bar — stage + zoom */}
-      <div className="sticky top-12 z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center justify-between gap-3">
+      <div className="sticky top-[47px] z-30 bg-paper border-y border-ink-2/20 px-5 py-2 flex items-center justify-between gap-3 -mt-px">
         <StageSelector />
         <div className="flex items-center gap-1 bg-paper-2 rounded-full border border-ink-2/20 px-1.5 py-1">
           <button
