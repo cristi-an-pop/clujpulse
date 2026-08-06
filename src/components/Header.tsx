@@ -14,7 +14,7 @@ export const Header: React.FC = () => {
       <div className="flex items-center gap-2">
         {festivalDay && (
           <span className="text-[11px] font-mono text-success tracking-wide">
-            LIVE · DAY {festivalDay}
+            DAY {festivalDay}
           </span>
         )}
         <span className="text-lg font-display font-bold text-ink tabular-nums">
