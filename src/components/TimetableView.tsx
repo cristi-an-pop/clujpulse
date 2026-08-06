@@ -110,28 +110,56 @@ export const TimetableView: React.FC = () => {
         </div>
 
         {/* Day + stage + zoom */}
-        <div className="flex flex-wrap items-center gap-5">
-          <div className="flex gap-2">
-            {[1, 2, 3, 4].map(d => (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex gap-2">
+              {[
+                { label: 'All', val: 0 },
+                { label: 'Day 1', val: 1 },
+                { label: 'Day 2', val: 2 },
+                { label: 'Day 3', val: 3 },
+                { label: 'Day 4', val: 4 }
+              ].map(d => (
+                <button
+                  key={d.val}
+                  onClick={() => { setSelectedDayFilter(d.val); if (d.val !== 0) setActiveDay(d.val); }}
+                  className={`px-4 py-2 rounded-full text-sm font-display font-bold transition-all ${
+                    selectedDayFilter === d.val
+                      ? 'bg-ink text-paper' : 'text-ink-2 hover:text-ink'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Zoom */}
+            <div className="flex items-center gap-1 ml-auto">
               <button
-                key={d}
-                onClick={() => { setSelectedDayFilter(d); setActiveDay(d); }}
-                className={`px-4 py-2 rounded-full text-sm font-display font-bold transition-all ${
-                  (selectedDayFilter === d || (selectedDayFilter === 0 && activeDay === d))
-                    ? 'bg-ink text-paper' : 'text-ink-3 hover:text-ink'
-                }`}
+                onClick={() => setZoomIdx(Math.max(0, zoomIdx - 1))}
+                disabled={zoomIdx === 0}
+                className="p-2 rounded-full text-ink-2 hover:text-ink disabled:opacity-30 transition-colors"
               >
-                Day {d}
+                <ZoomOut className="w-4 h-4" />
               </button>
-            ))}
+              <button
+                onClick={() => setZoomIdx(Math.min(ZOOM_LEVELS.length - 1, zoomIdx + 1))}
+                disabled={zoomIdx === ZOOM_LEVELS.length - 1}
+                className="p-2 rounded-full text-ink-2 hover:text-ink disabled:opacity-30 transition-colors"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-5 overflow-x-auto no-scrollbar">
+
+          {/* Stages */}
+          <div className="flex items-center gap-6 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setSelectedStageFilter('all')}
-              className={`text-sm font-display font-bold whitespace-nowrap relative ${selectedStageFilter === 'all' ? 'text-ink' : 'text-ink-3'}`}
+              className={`text-base font-display font-bold whitespace-nowrap relative ${selectedStageFilter === 'all' ? 'text-ink' : 'text-ink-2'}`}
             >
               All
-              {selectedStageFilter === 'all' && <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-ink rounded-full" />}
+              {selectedStageFilter === 'all' && <span className="absolute -bottom-1.5 left-0 right-0 h-0.5 bg-ink rounded-full" />}
             </button>
             {STAGES.map(s => {
               const isActive = selectedStageFilter === s.id;
@@ -139,32 +167,14 @@ export const TimetableView: React.FC = () => {
                 <button
                   key={s.id}
                   onClick={() => setSelectedStageFilter(isActive ? 'all' : s.id)}
-                  className="text-sm font-display font-bold whitespace-nowrap relative"
+                  className={`text-base font-display font-bold whitespace-nowrap relative ${!isActive ? 'text-ink-2' : ''}`}
                   style={{ color: isActive ? s.color : undefined }}
                 >
                   {s.name}
-                  {isActive && <span className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: s.color }} />}
+                  {isActive && <span className="absolute -bottom-1.5 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: s.color }} />}
                 </button>
               );
             })}
-          </div>
-
-          {/* Zoom controls */}
-          <div className="flex items-center gap-1 ml-auto">
-            <button
-              onClick={() => setZoomIdx(Math.max(0, zoomIdx - 1))}
-              disabled={zoomIdx === 0}
-              className="p-1.5 rounded text-ink-3 hover:text-ink disabled:opacity-30 transition-colors"
-            >
-              <ZoomOut className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setZoomIdx(Math.min(ZOOM_LEVELS.length - 1, zoomIdx + 1))}
-              disabled={zoomIdx === ZOOM_LEVELS.length - 1}
-              className="p-1.5 rounded text-ink-3 hover:text-ink disabled:opacity-30 transition-colors"
-            >
-              <ZoomIn className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </div>
@@ -182,15 +192,15 @@ export const TimetableView: React.FC = () => {
         <div className="relative mt-2">
           <div ref={scrollRef} className="overflow-x-auto no-scrollbar">
             <div style={{ width: gridWidth }}>
-              {/* Time header */}
-              <div className="flex h-9 border-b border-ink-2/30 sticky top-[53px] bg-paper z-20">
+              {/* Time header — sits outside the stage rows */}
+              <div className="flex h-8 border-b border-ink-2/40 mb-1">
                 {HOURS.map((hour, i) => (
                   <div
                     key={i}
                     className="flex items-end pb-1.5 px-3 border-l border-ink-2/20"
                     style={{ width: hourWidth }}
                   >
-                    <span className="text-xs font-mono text-ink-2">
+                    <span className="text-xs font-mono text-ink">
                       {hour.toString().padStart(2, '0')}:00
                     </span>
                   </div>
@@ -201,13 +211,13 @@ export const TimetableView: React.FC = () => {
               {visibleStages.map((stage) => {
                 const stageSets = displayedSets.filter(s => s.stageId === stage.id);
                 return (
-                  <div key={stage.id} className="border-b border-ink-2/25">
+                  <div key={stage.id} className="border-b border-ink-2/30">
                     {/* Stage label row */}
-                    <div className="sticky left-0 z-10 h-7 flex items-center px-3 gap-2" style={{ width: 'fit-content' }}>
-                      <span className="text-sm font-display font-bold" style={{ color: stage.color }}>
+                    <div className="sticky left-0 z-10 pt-3 pb-1 px-4 flex items-center gap-2" style={{ width: 'fit-content' }}>
+                      <span className="text-base font-display font-bold" style={{ color: stage.color }}>
                         {stage.name}
                       </span>
-                      <span className="text-[10px] font-mono text-ink-3">{stageSets.length}</span>
+                      <span className="text-xs font-mono text-ink-2">{stageSets.length}</span>
                     </div>
                     {/* Timeline blocks */}
                     <div className="relative" style={{ height: ROW_HEIGHT }}>

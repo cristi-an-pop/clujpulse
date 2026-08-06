@@ -65,7 +65,7 @@ export const ArtistsView: React.FC = () => {
       )}
 
       {/* Controls */}
-      <div className="px-6 mb-8 space-y-5">
+      <div className="px-6 mb-8 space-y-4">
         {/* Days */}
         <div className="flex gap-2">
           {[
@@ -81,7 +81,7 @@ export const ArtistsView: React.FC = () => {
               className={`px-4 py-2 rounded-full text-sm font-display font-bold transition-all ${
                 selectedDayFilter === d.val
                   ? 'bg-ink text-paper'
-                  : 'text-ink-3 hover:text-ink'
+                  : 'text-ink-2 hover:text-ink'
               }`}
             >
               {d.label}
@@ -93,8 +93,8 @@ export const ArtistsView: React.FC = () => {
         <div className="flex items-center gap-6 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setSelectedStageFilter('all')}
-            className={`text-lg font-display font-bold whitespace-nowrap transition-colors relative ${
-              selectedStageFilter === 'all' ? 'text-ink' : 'text-ink-3'
+            className={`text-base font-display font-bold whitespace-nowrap transition-colors relative ${
+              selectedStageFilter === 'all' ? 'text-ink' : 'text-ink-2'
             }`}
           >
             All
@@ -108,7 +108,7 @@ export const ArtistsView: React.FC = () => {
               <button
                 key={stage.id}
                 onClick={() => setSelectedStageFilter(isActive ? 'all' : stage.id)}
-                className="text-lg font-display font-bold whitespace-nowrap transition-colors relative"
+                className={`text-base font-display font-bold whitespace-nowrap transition-colors relative ${!isActive ? 'text-ink-2' : ''}`}
                 style={{ color: isActive ? stage.color : undefined }}
               >
                 {stage.name}
@@ -122,18 +122,18 @@ export const ArtistsView: React.FC = () => {
 
         {/* Search */}
         <div className="relative max-w-sm">
-          <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-3" />
+          <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-2" />
           <input
             type="text"
             placeholder="Find an artist..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-7 pr-8 py-2 bg-transparent border-b border-rule text-ink placeholder-ink-3 text-sm font-body outline-none transition-colors focus:border-ink"
+            className="w-full pl-7 pr-8 py-2.5 bg-transparent border-b border-ink-2/30 text-ink placeholder-ink-2 text-sm font-body outline-none transition-colors focus:border-ink"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-0 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink"
+              className="absolute right-0 top-1/2 -translate-y-1/2 text-ink-2 hover:text-ink"
             >
               <X className="w-4 h-4" />
             </button>
@@ -157,7 +157,7 @@ export const ArtistsView: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="divide-y divide-rule/50">
+        <div className="divide-y divide-ink-2/20">
           {filteredSets.map((set) => (
             <ArtistCard key={set.id} set={set} />
           ))}
