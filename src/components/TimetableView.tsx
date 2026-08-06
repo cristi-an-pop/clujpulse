@@ -266,13 +266,14 @@ function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: S
   const [confirmRemove, setConfirmRemove] = React.useState(false);
   const [showTooltip, setShowTooltip] = React.useState(false);
   const holdTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didHold = React.useRef(false);
 
   const left = minutesToGridX(startMin, hourWidth);
   const width = minutesToGridX(duration, hourWidth);
   const hasClash = clashInfo?.hasClash ?? false;
-  const isTruncated = set.artistName.length > width / 9;
 
   const handleClick = () => {
+    if (didHold.current) { didHold.current = false; return; }
     if (showTooltip) { setShowTooltip(false); return; }
     if (!isFavorited) {
       onToggle();
@@ -285,53 +286,62 @@ function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: S
     }
   };
 
-  const handlePointerDown = () => {
-    if (!isTruncated) return;
-    holdTimer.current = setTimeout(() => setShowTooltip(true), 500);
+  const handleTouchStart = () => {
+    didHold.current = false;
+    holdTimer.current = setTimeout(() => {
+      setShowTooltip(true);
+      didHold.current = true;
+    }, 400);
   };
 
-  const handlePointerUp = () => {
+  const handleTouchEnd = () => {
     if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; }
+    if (showTooltip) {
+      setTimeout(() => setShowTooltip(false), 2000);
+    }
   };
 
   return (
     <div
       onClick={handleClick}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={() => { handlePointerUp(); setShowTooltip(false); }}
-      className="absolute top-2 bottom-2 rounded-lg flex flex-col justify-center px-3 cursor-pointer overflow-hidden transition-all hover:brightness-110 group"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      className="absolute top-2 bottom-2 rounded-lg flex flex-col justify-center px-3 cursor-pointer transition-all hover:brightness-110"
       style={{
         left,
         width: Math.max(width, 50),
+        overflow: 'visible',
         backgroundColor: confirmRemove ? 'var(--color-danger-soft)' : isFavorited ? stage.color : `${stage.color}18`,
         color: confirmRemove ? 'var(--color-danger)' : isFavorited ? '#080612' : '#e4e4e7',
         boxShadow: isFavorited && !confirmRemove ? `0 2px 12px ${stage.color}30` : 'none',
         border: confirmRemove ? '2px solid var(--color-danger)' : hasClash ? '2px solid var(--color-danger)' : `1px solid ${isFavorited ? stage.color : stage.color + '50'}`,
       }}
     >
-      {confirmRemove ? (
-        <span className="text-[12px] font-display font-bold">Tap to remove</span>
-      ) : (
-        <>
-          <span className="text-[13px] font-display font-bold truncate tracking-tight leading-tight">
-            {set.artistName}
-          </span>
-          {hasClash ? (
-            <span className="text-[10px] font-display font-bold text-danger mt-0.5">OVERLAP</span>
-          ) : width > 120 ? (
-            <span className="text-[10px] font-mono opacity-50 mt-0.5">{set.startTime}–{set.endTime}</span>
-          ) : null}
-        </>
-      )}
+      <div className="overflow-hidden">
+        {confirmRemove ? (
+          <span className="text-[12px] font-display font-bold">Tap to remove</span>
+        ) : (
+          <>
+            <span className="text-[13px] font-display font-bold truncate block tracking-tight leading-tight">
+              {set.artistName}
+            </span>
+            {hasClash ? (
+              <span className="text-[10px] font-display font-bold text-danger mt-0.5 block">OVERLAP</span>
+            ) : width > 120 ? (
+              <span className="text-[10px] font-mono opacity-50 mt-0.5 block">{set.startTime}–{set.endTime}</span>
+            ) : null}
+          </>
+        )}
+      </div>
 
-      {/* Tooltip — shows on hold (mobile) or hover (desktop) */}
-      {isTruncated && !confirmRemove && (
-        <div className={`absolute bottom-full left-0 mb-2 px-3 py-2 bg-ink text-paper rounded-lg shadow-xl text-xs font-display font-bold whitespace-nowrap z-50 pointer-events-none transition-opacity ${
-          showTooltip ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-        }`}>
+      {/* Tooltip */}
+      {showTooltip && !confirmRemove && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-ink text-paper rounded-lg shadow-xl text-[12px] font-display font-bold whitespace-nowrap z-[100] pointer-events-none">
           {set.artistName}
           <span className="text-ink-2 font-mono font-normal ml-2">{set.startTime}–{set.endTime}</span>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-ink" />
         </div>
       )}
     </div>
