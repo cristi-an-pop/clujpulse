@@ -528,12 +528,12 @@ export const ARTIST_SETS: ArtistSet[] = [
   },
   {
     id: "galaxy_d1_2300",
-    artistName: "NIC FANCIULLI",
+    artistName: "IGOR MARIJUAN",
     stageId: "galaxy",
     day: 1,
     startTime: "23:00",
     endTime: "01:00",
-    imageUrl: "https://untold-universe-public-resources-prod.s3.eu-west-1.amazonaws.com/a1ed8593-2745-416a-95fd-660ed9fbba16/63941905-11df-48f1-af8b-38cbf68c5ccf.png",
+    imageUrl: "https://untold-universe-public-resources-prod.s3.eu-west-1.amazonaws.com/a1ed8593-2745-416a-95fd-660ed9fbba16/4f7d5383-344e-4b5d-b2cc-6766e5a842c3.png",
   },
   {
     id: "main_d1_2310",
@@ -1866,6 +1866,15 @@ export const ARTIST_SETS: ArtistSet[] = [
     startTime: "21:30",
     endTime: "23:30",
     imageUrl: "https://untold-universe-public-resources-prod.s3.eu-west-1.amazonaws.com/a1ed8593-2745-416a-95fd-660ed9fbba16/84957d4b-3f14-4d33-9f37-4ff45255ad52.png",
+  },
+  {
+    id: "main_d3_2130",
+    artistName: "STAR EDITION - TICKETS ON SALE SOON",
+    stageId: "main",
+    day: 3,
+    startTime: "21:30",
+    endTime: "21:35",
+    imageUrl: "https://untold-universe-public-resources-prod.s3.eu-west-1.amazonaws.com/a1ed8593-2745-416a-95fd-660ed9fbba16/ddcf97a6-2283-4108-b073-3371abf71c76.png",
   },
   {
     id: "form_d3_2145",
