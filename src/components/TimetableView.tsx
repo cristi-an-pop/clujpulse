@@ -264,12 +264,16 @@ function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: S
   const endMin = timeToMinutes(set.endTime);
   const duration = endMin - startMin;
   const [confirmRemove, setConfirmRemove] = React.useState(false);
+  const [showTooltip, setShowTooltip] = React.useState(false);
+  const holdTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const left = minutesToGridX(startMin, hourWidth);
   const width = minutesToGridX(duration, hourWidth);
   const hasClash = clashInfo?.hasClash ?? false;
+  const isTruncated = set.artistName.length > width / 9;
 
   const handleClick = () => {
+    if (showTooltip) { setShowTooltip(false); return; }
     if (!isFavorited) {
       onToggle();
     } else if (confirmRemove) {
@@ -281,10 +285,22 @@ function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: S
     }
   };
 
+  const handlePointerDown = () => {
+    if (!isTruncated) return;
+    holdTimer.current = setTimeout(() => setShowTooltip(true), 500);
+  };
+
+  const handlePointerUp = () => {
+    if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; }
+  };
+
   return (
     <div
       onClick={handleClick}
-      className="absolute top-2 bottom-2 rounded-lg flex flex-col justify-center px-3 cursor-pointer overflow-hidden transition-all hover:brightness-110"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={() => { handlePointerUp(); setShowTooltip(false); }}
+      className="absolute top-2 bottom-2 rounded-lg flex flex-col justify-center px-3 cursor-pointer overflow-hidden transition-all hover:brightness-110 group"
       style={{
         left,
         width: Math.max(width, 50),
@@ -293,7 +309,6 @@ function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: S
         boxShadow: isFavorited && !confirmRemove ? `0 2px 12px ${stage.color}30` : 'none',
         border: confirmRemove ? '2px solid var(--color-danger)' : hasClash ? '2px solid var(--color-danger)' : `1px solid ${isFavorited ? stage.color : stage.color + '50'}`,
       }}
-      title={`${set.artistName} · ${set.startTime}–${set.endTime}`}
     >
       {confirmRemove ? (
         <span className="text-[12px] font-display font-bold">Tap to remove</span>
@@ -308,6 +323,16 @@ function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: S
             <span className="text-[10px] font-mono opacity-50 mt-0.5">{set.startTime}–{set.endTime}</span>
           ) : null}
         </>
+      )}
+
+      {/* Tooltip — shows on hold (mobile) or hover (desktop) */}
+      {isTruncated && !confirmRemove && (
+        <div className={`absolute bottom-full left-0 mb-2 px-3 py-2 bg-ink text-paper rounded-lg shadow-xl text-xs font-display font-bold whitespace-nowrap z-50 pointer-events-none transition-opacity ${
+          showTooltip ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        }`}>
+          {set.artistName}
+          <span className="text-ink-2 font-mono font-normal ml-2">{set.startTime}–{set.endTime}</span>
+        </div>
       )}
     </div>
   );
