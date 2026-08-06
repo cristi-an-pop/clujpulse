@@ -9,7 +9,8 @@ import { AlertTriangle } from 'lucide-react';
 import { Modal } from './Modal';
 
 const HOUR_WIDTH = 180;
-const ROW_HEIGHT = 110;
+const ROW_HEIGHT = 100;
+const STAGE_LABEL_W = 140;
 const HOURS = Array.from({ length: 15 }, (_, i) => (16 + i) % 24);
 const GRID_END = 840;
 
@@ -31,6 +32,7 @@ export const TimetableView: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const myFavorites = useMemo(() => {
     return ARTIST_SETS.filter(s => favoriteIds.includes(s.id));
@@ -59,7 +61,12 @@ export const TimetableView: React.FC = () => {
     }
   }, []);
 
+  const handleScroll = () => {
+    if (scrollRef.current) setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
   const gridWidth = 15 * HOUR_WIDTH;
+  const showStickyLabels = scrollLeft > STAGE_LABEL_W;
 
   return (
     <div className="w-full pb-16">
@@ -83,9 +90,7 @@ export const TimetableView: React.FC = () => {
           <button
             onClick={() => setTimetableMode('full')}
             className={`px-5 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
-              timetableMode === 'full'
-                ? 'bg-ink text-paper'
-                : 'text-ink-3 hover:text-ink'
+              timetableMode === 'full' ? 'bg-ink text-paper' : 'text-ink-3 hover:text-ink'
             }`}
           >
             Everyone
@@ -93,9 +98,7 @@ export const TimetableView: React.FC = () => {
           <button
             onClick={() => setTimetableMode('my-lineup')}
             className={`px-5 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
-              timetableMode === 'my-lineup'
-                ? 'bg-accent text-paper'
-                : 'text-ink-3 hover:text-ink'
+              timetableMode === 'my-lineup' ? 'bg-accent text-paper' : 'text-ink-3 hover:text-ink'
             }`}
           >
             Your Picks
@@ -103,51 +106,36 @@ export const TimetableView: React.FC = () => {
               <span className="ml-1.5 font-mono text-xs opacity-80">{myFavorites.length}</span>
             )}
           </button>
-
           {timetableMode === 'my-lineup' && myFavorites.length > 0 && (
-            <button
-              onClick={() => setShowClearModal(true)}
-              className="ml-auto text-xs font-mono text-danger"
-            >
+            <button onClick={() => setShowClearModal(true)} className="ml-auto text-xs font-mono text-danger">
               clear
             </button>
           )}
         </div>
 
-        {/* Day + stage selectors */}
+        {/* Day + stage */}
         <div className="flex flex-wrap items-center gap-5">
           <div className="flex gap-2">
-            {[
-              { label: 'Day 1', val: 1 },
-              { label: 'Day 2', val: 2 },
-              { label: 'Day 3', val: 3 },
-              { label: 'Day 4', val: 4 }
-            ].map(d => (
+            {[1, 2, 3, 4].map(d => (
               <button
-                key={d.val}
-                onClick={() => { setSelectedDayFilter(d.val); setActiveDay(d.val); }}
+                key={d}
+                onClick={() => { setSelectedDayFilter(d); setActiveDay(d); }}
                 className={`px-4 py-2 rounded-full text-sm font-display font-bold transition-all ${
-                  (selectedDayFilter === d.val || (selectedDayFilter === 0 && activeDay === d.val))
-                    ? 'bg-ink text-paper'
-                    : 'text-ink-3 hover:text-ink'
+                  (selectedDayFilter === d || (selectedDayFilter === 0 && activeDay === d))
+                    ? 'bg-ink text-paper' : 'text-ink-3 hover:text-ink'
                 }`}
               >
-                {d.label}
+                Day {d}
               </button>
             ))}
           </div>
-
           <div className="flex items-center gap-5 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setSelectedStageFilter('all')}
-              className={`text-sm font-display font-bold whitespace-nowrap relative ${
-                selectedStageFilter === 'all' ? 'text-ink' : 'text-ink-3'
-              }`}
+              className={`text-sm font-display font-bold whitespace-nowrap relative ${selectedStageFilter === 'all' ? 'text-ink' : 'text-ink-3'}`}
             >
               All
-              {selectedStageFilter === 'all' && (
-                <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-ink rounded-full" />
-              )}
+              {selectedStageFilter === 'all' && <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-ink rounded-full" />}
             </button>
             {STAGES.map(s => {
               const isActive = selectedStageFilter === s.id;
@@ -159,9 +147,7 @@ export const TimetableView: React.FC = () => {
                   style={{ color: isActive ? s.color : undefined }}
                 >
                   {s.name}
-                  {isActive && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: s.color }} />
-                  )}
+                  {isActive && <span className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full" style={{ backgroundColor: s.color }} />}
                 </button>
               );
             })}
@@ -174,55 +160,66 @@ export const TimetableView: React.FC = () => {
         <div className="px-6 py-24 text-center">
           <p className="text-3xl font-display font-bold text-ink-3 tracking-tight">Nothing here yet</p>
           <p className="text-sm text-ink-3 mt-3">Head to Artists and build your night.</p>
-          <button
-            onClick={() => setActiveTab('artists')}
-            className="mt-6 px-6 py-3 rounded-full font-display font-bold text-sm bg-ink text-paper"
-          >
+          <button onClick={() => setActiveTab('artists')} className="mt-6 px-6 py-3 rounded-full font-display font-bold text-sm bg-ink text-paper">
             Browse Artists
           </button>
         </div>
       ) : (
-        <div className="mt-2">
-          <div ref={scrollRef} className="overflow-x-auto no-scrollbar">
+        <div className="relative mt-2">
+          {/* Sticky stage labels that appear when scrolled */}
+          {showStickyLabels && (
+            <div className="absolute left-0 top-8 z-30 pointer-events-none">
+              {visibleStages.map((stage) => (
+                <div key={stage.id} className="flex items-center gap-2 px-4 py-1" style={{ height: ROW_HEIGHT }}>
+                  <span className="text-sm font-display font-bold px-2 py-0.5 rounded bg-paper/90 backdrop-blur-sm" style={{ color: stage.color }}>
+                    {stage.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div ref={scrollRef} onScroll={handleScroll} className="overflow-x-auto no-scrollbar">
             <div style={{ width: gridWidth }}>
-              {/* Time header */}
-              <div className="flex h-8 sticky top-[57px] bg-paper/90 backdrop-blur-md z-10 border-b border-rule/20 ml-4">
+              {/* Time header row */}
+              <div className="flex h-8 border-b border-ink-3/30">
                 {HOURS.map((hour, i) => (
-                  <div key={i} className="flex items-center px-3" style={{ width: HOUR_WIDTH }}>
+                  <div
+                    key={i}
+                    className="flex items-end pb-1 px-3 border-r border-ink-3/20"
+                    style={{ width: HOUR_WIDTH }}
+                  >
                     <span className="text-[11px] font-mono text-ink-2">
                       {hour.toString().padStart(2, '0')}:00
                     </span>
                   </div>
                 ))}
-                {currentMinutes >= 0 && currentMinutes <= GRID_END && (
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-accent z-20"
-                    style={{ left: minutesToGridX(currentMinutes) }}
-                  >
-                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-accent shadow-[0_0_8px_var(--color-accent)]" />
-                  </div>
-                )}
               </div>
 
-              {/* Stage rows — label floats above the row */}
+              {/* Stage rows */}
               {visibleStages.map((stage) => {
                 const stageSets = displayedSets.filter(s => s.stageId === stage.id);
                 return (
-                  <div key={stage.id}>
-                    {/* Stage name as a row header */}
-                    <div className="sticky left-0 z-10 px-4 pt-4 pb-1 flex items-baseline gap-3">
-                      <span className="text-base font-display font-bold" style={{ color: stage.color }}>
-                        {stage.name}
-                      </span>
-                      <span className="text-[11px] font-mono text-ink-3">
-                        {stageSets.length} set{stageSets.length !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-                    {/* Timeline row */}
+                  <div key={stage.id} className="border-b border-ink-3/20">
                     <div className="relative" style={{ height: ROW_HEIGHT }}>
+                      {/* Hour grid lines */}
                       {HOURS.map((_, i) => (
-                        <div key={i} className="absolute top-2 bottom-2 w-px bg-rule/15" style={{ left: i * HOUR_WIDTH }} />
+                        <div key={i} className="absolute top-0 bottom-0 w-px bg-ink-3/10 border-r border-ink-3/10" style={{ left: i * HOUR_WIDTH }} />
                       ))}
+
+                      {/* Stage name inside the row (visible when not scrolled) */}
+                      {!showStickyLabels && (
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center gap-2 pointer-events-none">
+                          <span className="text-base font-display font-bold" style={{ color: stage.color }}>
+                            {stage.name}
+                          </span>
+                          <span className="text-[10px] font-mono text-ink-3">
+                            {stageSets.length}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Artist blocks */}
                       {stageSets.map((set) => (
                         <SetBlock
                           key={set.id}
@@ -232,18 +229,29 @@ export const TimetableView: React.FC = () => {
                           onToggle={() => toggleFavorite(set.id)}
                           clashInfo={
                             favoriteIds.includes(set.id) && timetableMode === 'my-lineup'
-                              ? checkSetClash(set, myFavorites)
-                              : null
+                              ? checkSetClash(set, myFavorites) : null
                           }
                         />
                       ))}
+
+                      {/* Now indicator */}
                       {currentMinutes >= 0 && currentMinutes <= GRID_END && (
-                        <div className="absolute top-0 bottom-0 w-px bg-accent/20" style={{ left: minutesToGridX(currentMinutes) }} />
+                        <div className="absolute top-0 bottom-0 w-0.5 bg-accent/40 z-10" style={{ left: minutesToGridX(currentMinutes) }} />
                       )}
                     </div>
                   </div>
                 );
               })}
+
+              {/* Now indicator in header area */}
+              {currentMinutes >= 0 && currentMinutes <= GRID_END && (
+                <div
+                  className="absolute top-0 w-0.5 bg-accent z-20"
+                  style={{ left: minutesToGridX(currentMinutes), height: 8 + visibleStages.length * ROW_HEIGHT + 'px' }}
+                >
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-accent shadow-[0_0_6px_var(--color-accent)]" />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -293,21 +301,20 @@ function SetBlock({ set, stage, isFavorited, onToggle, clashInfo }: SetBlockProp
 
   const left = minutesToGridX(startMin);
   const width = minutesToGridX(duration);
-
   const hasClash = clashInfo?.hasClash ?? false;
 
   return (
     <div
       onClick={onToggle}
-      className={`absolute top-3 bottom-3 rounded-2xl flex items-center px-4 gap-2 cursor-pointer overflow-hidden transition-all ${
+      className={`absolute top-3 bottom-3 rounded-xl flex items-center px-3 gap-2 cursor-pointer overflow-hidden transition-all hover:brightness-110 ${
         hasClash ? 'ring-2 ring-danger ring-offset-1 ring-offset-paper' : ''
       }`}
       style={{
         left,
-        width: Math.max(width, 70),
+        width: Math.max(width, 60),
         backgroundColor: isFavorited ? stage.color : `${stage.color}20`,
         color: isFavorited ? '#080612' : '#e4e4e7',
-        boxShadow: isFavorited ? `0 4px 20px ${stage.color}30` : 'none',
+        boxShadow: isFavorited ? `0 2px 12px ${stage.color}30` : 'none',
         border: isFavorited ? 'none' : `1px solid ${stage.color}40`,
       }}
       title={`${set.artistName} · ${set.startTime}–${set.endTime}`}
@@ -316,8 +323,8 @@ function SetBlock({ set, stage, isFavorited, onToggle, clashInfo }: SetBlockProp
       <span className="text-sm font-display font-bold truncate tracking-tight">
         {set.artistName}
       </span>
-      {width > 180 && (
-        <span className="text-[11px] font-mono opacity-60 shrink-0 ml-auto">
+      {width > 160 && (
+        <span className="text-[11px] font-mono opacity-50 shrink-0 ml-auto">
           {set.startTime}
         </span>
       )}
