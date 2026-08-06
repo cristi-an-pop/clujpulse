@@ -121,13 +121,6 @@ export const TimetableView: React.FC = () => {
           ))}
         </div>
 
-        {/* Lock screen link (desktop) */}
-        <button
-          onClick={() => setIsWallpaperModalOpen(true)}
-          className="hidden sm:flex items-center gap-2 text-sm font-display font-bold text-ink-2 hover:text-ink transition-colors"
-        >
-          Save as Lock Screen →
-        </button>
       </div>
 
       {/* Sticky bar — stage + zoom */}
@@ -211,13 +204,15 @@ export const TimetableView: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile lock screen button */}
-          <button
-            onClick={() => setIsWallpaperModalOpen(true)}
-            className="fixed bottom-16 right-4 z-30 px-4 py-2.5 rounded-full text-xs font-display font-bold bg-paper-2 text-ink border border-rule shadow-lg sm:hidden"
-          >
-            Lock Screen →
-          </button>
+          {/* Lock screen button — bottom center when scrolling */}
+          <div className="sticky bottom-14 z-30 flex justify-center pointer-events-none mt-4">
+            <button
+              onClick={() => setIsWallpaperModalOpen(true)}
+              className="pointer-events-auto px-5 py-2.5 rounded-full text-xs font-display font-bold bg-paper-2/90 backdrop-blur-sm text-ink-2 border border-rule/50 shadow-lg hover:text-ink transition-colors"
+            >
+              Save as Lock Screen →
+            </button>
+          </div>
         </div>
       )}
 
