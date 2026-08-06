@@ -58,10 +58,10 @@ export const StageSelector: React.FC = () => {
                   <button
                     key={stage.id}
                     onClick={() => { setSelectedStageFilter(stage.id); setOpen(false); }}
-                    className="px-5 py-4 rounded-xl text-left text-lg font-display font-bold transition-colors text-paper"
+                    className="px-5 py-4 rounded-xl text-left text-lg font-display font-bold transition-colors"
                     style={{
-                      backgroundColor: selectedStageFilter === stage.id ? stage.color : `${stage.color}25`,
-                      color: selectedStageFilter === stage.id ? '#080612' : stage.color,
+                      backgroundColor: selectedStageFilter === stage.id ? stage.color : 'transparent',
+                      color: selectedStageFilter === stage.id ? '#080612' : '#e4e4e7',
                     }}
                   >
                     {stage.name}

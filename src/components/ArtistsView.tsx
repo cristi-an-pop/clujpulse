@@ -80,7 +80,7 @@ export const ArtistsView: React.FC = () => {
       </div>
 
       {/* Sticky bar — stage + search */}
-      <div className="sticky top-[48px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center gap-3">
+      <div className="sticky top-12 z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center gap-3">
         <StageSelector />
 
         <div className="relative flex-1 max-w-xs ml-auto">

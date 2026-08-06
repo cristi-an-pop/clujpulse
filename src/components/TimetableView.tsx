@@ -131,7 +131,7 @@ export const TimetableView: React.FC = () => {
       </div>
 
       {/* Sticky bar — stage + zoom */}
-      <div className="sticky top-[48px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center justify-between gap-3">
+      <div className="sticky top-12 z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center justify-between gap-3">
         <StageSelector />
         <div className="flex items-center gap-1 bg-paper-2 rounded-full border border-ink-2/20 px-1.5 py-1">
           <button
@@ -263,33 +263,52 @@ function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: S
   const startMin = timeToMinutes(set.startTime);
   const endMin = timeToMinutes(set.endTime);
   const duration = endMin - startMin;
+  const [confirmRemove, setConfirmRemove] = React.useState(false);
 
   const left = minutesToGridX(startMin, hourWidth);
   const width = minutesToGridX(duration, hourWidth);
   const hasClash = clashInfo?.hasClash ?? false;
 
+  const handleClick = () => {
+    if (!isFavorited) {
+      onToggle();
+    } else if (confirmRemove) {
+      onToggle();
+      setConfirmRemove(false);
+    } else {
+      setConfirmRemove(true);
+      setTimeout(() => setConfirmRemove(false), 3000);
+    }
+  };
+
   return (
     <div
-      onClick={onToggle}
+      onClick={handleClick}
       className="absolute top-2 bottom-2 rounded-lg flex flex-col justify-center px-3 cursor-pointer overflow-hidden transition-all hover:brightness-110"
       style={{
         left,
         width: Math.max(width, 50),
-        backgroundColor: isFavorited ? stage.color : `${stage.color}18`,
-        color: isFavorited ? '#080612' : '#e4e4e7',
-        boxShadow: isFavorited ? `0 2px 12px ${stage.color}30` : 'none',
-        border: hasClash ? '2px solid var(--color-danger)' : `1px solid ${isFavorited ? stage.color : stage.color + '50'}`,
+        backgroundColor: confirmRemove ? 'var(--color-danger-soft)' : isFavorited ? stage.color : `${stage.color}18`,
+        color: confirmRemove ? 'var(--color-danger)' : isFavorited ? '#080612' : '#e4e4e7',
+        boxShadow: isFavorited && !confirmRemove ? `0 2px 12px ${stage.color}30` : 'none',
+        border: confirmRemove ? '2px solid var(--color-danger)' : hasClash ? '2px solid var(--color-danger)' : `1px solid ${isFavorited ? stage.color : stage.color + '50'}`,
       }}
       title={`${set.artistName} · ${set.startTime}–${set.endTime}`}
     >
-      <span className="text-[13px] font-display font-bold truncate tracking-tight leading-tight">
-        {set.artistName}
-      </span>
-      {hasClash ? (
-        <span className="text-[10px] font-display font-bold text-danger mt-0.5">OVERLAP</span>
-      ) : width > 120 ? (
-        <span className="text-[10px] font-mono opacity-50 mt-0.5">{set.startTime}–{set.endTime}</span>
-      ) : null}
+      {confirmRemove ? (
+        <span className="text-[12px] font-display font-bold">Tap to remove</span>
+      ) : (
+        <>
+          <span className="text-[13px] font-display font-bold truncate tracking-tight leading-tight">
+            {set.artistName}
+          </span>
+          {hasClash ? (
+            <span className="text-[10px] font-display font-bold text-danger mt-0.5">OVERLAP</span>
+          ) : width > 120 ? (
+            <span className="text-[10px] font-mono opacity-50 mt-0.5">{set.startTime}–{set.endTime}</span>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }
