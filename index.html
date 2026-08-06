@@ -2,13 +2,62 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1a1625" />
+
+    <title>ClujPulse — UNTOLD 2026 Festival Schedule & Lineup Builder</title>
+    <meta name="description" content="Build your UNTOLD 2026 lineup, browse 300+ artists across 9 stages, and never miss a set. Works offline — no signal needed at the festival." />
+    <meta name="keywords" content="UNTOLD 2026, Cluj-Napoca, festival schedule, lineup builder, timetable, EDM, electronic music, Romania festival" />
+    <link rel="canonical" href="https://clujpulse.vercel.app" />
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://clujpulse.vercel.app" />
+    <meta property="og:title" content="ClujPulse — UNTOLD 2026 Lineup Builder" />
+    <meta property="og:description" content="300+ artists, 9 stages, 4 nights. Build your lineup, spot clashes, save your schedule as a lock screen wallpaper. Works offline." />
+    <meta property="og:site_name" content="ClujPulse" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ClujPulse — UNTOLD 2026 Lineup Builder" />
+    <meta name="twitter:description" content="Build your UNTOLD lineup. 300+ artists, clash detection, lock screen export. Works offline at the festival." />
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#0f0d19" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ClujPulse" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Geist:wght@300..500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <title>ClujPulse</title>
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "ClujPulse",
+      "url": "https://clujpulse.vercel.app",
+      "description": "Offline-first companion app for UNTOLD 2026 festival. Browse artists, build your lineup, detect schedule clashes.",
+      "applicationCategory": "EntertainmentApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0" },
+      "about": {
+        "@type": "MusicEvent",
+        "name": "UNTOLD Festival 2026",
+        "startDate": "2026-08-06",
+        "endDate": "2026-08-09",
+        "location": {
+          "@type": "Place",
+          "name": "Cluj Arena",
+          "address": { "@type": "PostalAddress", "addressLocality": "Cluj-Napoca", "addressCountry": "RO" }
+        }
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
