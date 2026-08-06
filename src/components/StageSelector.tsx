@@ -16,13 +16,13 @@ export const StageSelector: React.FC = () => {
     <>
       <button
         onClick={() => setOpen(true)}
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-display font-bold transition-colors ${
-          activeStage ? 'text-paper' : 'text-ink border border-ink-2/30'
+        className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono font-semibold tracking-wide transition-colors ${
+          activeStage ? 'text-paper' : 'text-ink border border-ink/30'
         }`}
         style={activeStage ? { backgroundColor: color } : {}}
       >
-        <span>{label}</span>
-        <ChevronDown className="w-4 h-4 opacity-60" />
+        <span className="max-w-[110px] truncate uppercase">{label}</span>
+        <ChevronDown className="w-3.5 h-3.5 opacity-80 shrink-0" />
       </button>
 
       <AnimatePresence>

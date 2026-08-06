@@ -1,21 +1,22 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import { ARTIST_SETS, STAGES } from '../data/scheduleData';
 import type { ArtistSet, Stage } from '../types';
 import { useCurrentTime } from '../hooks/useCurrentTime';
-import { timeToMinutes, checkSetClash } from '../utils/clashDetection';
+import { timeToMinutes, doSetsOverlap, checkSetClash } from '../utils/clashDetection';
 import { WallpaperExporter } from './WallpaperExporter';
 import { StageSelector } from './StageSelector';
+import { DayPills } from './DayPills';
 import { Modal } from './Modal';
-import { Minus, Plus } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
-const ZOOM_LEVELS = [180, 260, 360, 480];
+const HOUR_WIDTH = 360;
 const ROW_HEIGHT = 80;
 const HOURS = Array.from({ length: 15 }, (_, i) => (16 + i) % 24);
 const GRID_END = 840;
 
-function minutesToGridX(minutes: number, hourWidth: number): number {
-  return (minutes / 60) * hourWidth;
+function minutesToGridX(minutes: number): number {
+  return (minutes / 60) * HOUR_WIDTH;
 }
 
 export const TimetableView: React.FC = () => {
@@ -32,9 +33,6 @@ export const TimetableView: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
-  const [zoomIdx, setZoomIdx] = useState(2);
-
-  const hourWidth = ZOOM_LEVELS[zoomIdx];
 
   const myFavorites = useMemo(() => {
     return ARTIST_SETS.filter(s => favoriteIds.includes(s.id));
@@ -55,95 +53,132 @@ export const TimetableView: React.FC = () => {
     });
   }, [timetableMode, myFavorites, selectedDayFilter, selectedStageFilter, activeDay]);
 
+  const [isAwayFromNow, setIsAwayFromNow] = useState(false);
+
+  const clashPairs = useMemo(() => {
+    if (timetableMode !== 'my-lineup') return [];
+    const dayFilter = selectedDayFilter !== 0 ? selectedDayFilter : activeDay;
+    const daySets = myFavorites.filter(s => s.day === dayFilter);
+    const seen = new Set<string>();
+    const pairs: { a: ArtistSet; b: ArtistSet }[] = [];
+    for (let i = 0; i < daySets.length; i++) {
+      for (let j = i + 1; j < daySets.length; j++) {
+        const { overlaps } = doSetsOverlap(daySets[i], daySets[j]);
+        if (overlaps) {
+          const key = [daySets[i].id, daySets[j].id].sort().join(':');
+          if (!seen.has(key)) {
+            seen.add(key);
+            pairs.push({ a: daySets[i], b: daySets[j] });
+          }
+        }
+      }
+    }
+    return pairs;
+  }, [timetableMode, myFavorites, selectedDayFilter, activeDay]);
+
+  const [clashScrollIdx, setClashScrollIdx] = useState(0);
+
+  const scrollToSet = useCallback((set: ArtistSet) => {
+    if (!scrollRef.current) return;
+    const startMin = timeToMinutes(set.startTime);
+    const x = minutesToGridX(startMin) - 100;
+    scrollRef.current.scrollTo({ left: Math.max(0, x), behavior: 'smooth' });
+  }, [HOUR_WIDTH]);
+
+  const handleClashTap = useCallback(() => {
+    if (clashPairs.length === 0) return;
+    const idx = clashScrollIdx % clashPairs.length;
+    scrollToSet(clashPairs[idx].a);
+    setClashScrollIdx(idx + 1);
+  }, [clashPairs, clashScrollIdx, scrollToSet]);
+
+  const scrollToNow = useCallback(() => {
+    if (!scrollRef.current || currentMinutes <= 0) return;
+    const x = minutesToGridX(currentMinutes) - 200;
+    scrollRef.current.scrollTo({ left: Math.max(0, x), behavior: 'smooth' });
+  }, [currentMinutes]);
+
   useEffect(() => {
     if (scrollRef.current && currentMinutes > 0) {
-      const scrollTo = minutesToGridX(currentMinutes, hourWidth) - 200;
+      const scrollTo = minutesToGridX(currentMinutes) - 200;
       if (scrollTo > 0) scrollRef.current.scrollLeft = scrollTo;
     }
   }, []);
 
-  const gridWidth = 15 * hourWidth;
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || currentMinutes <= 0 || currentMinutes > GRID_END) return;
+    const nowX = minutesToGridX(currentMinutes);
+    const checkDistance = () => {
+      const viewCenter = el.scrollLeft + el.clientWidth / 2;
+      setIsAwayFromNow(Math.abs(viewCenter - nowX) > el.clientWidth * 0.6);
+    };
+    checkDistance();
+    el.addEventListener('scroll', checkDistance, { passive: true });
+    return () => el.removeEventListener('scroll', checkDistance);
+  }, [currentMinutes]);
+
+  const gridWidth = 15 * HOUR_WIDTH;
 
   return (
     <div className="w-full pb-16">
 
-      {/* Top section — not sticky */}
-      <div className="px-5 pt-6 pb-4 space-y-5">
-        {/* Mode toggle */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setTimetableMode('full')}
-              className={`px-5 py-2.5 rounded-full text-base font-display font-bold transition-all ${
-                timetableMode === 'full' ? 'bg-ink text-paper' : 'text-ink-2'
-              }`}
-            >
-              Everyone
-            </button>
-            <button
-              onClick={() => setTimetableMode('my-lineup')}
-              className={`px-5 py-2.5 rounded-full text-base font-display font-bold transition-all ${
-                timetableMode === 'my-lineup' ? 'bg-accent text-paper' : 'text-ink-2'
-              }`}
-            >
-              Your Picks
-              {myFavorites.length > 0 && (
-                <span className="ml-1.5 font-mono text-sm opacity-80">{myFavorites.length}</span>
-              )}
-            </button>
-          </div>
-
-          {timetableMode === 'my-lineup' && myFavorites.length > 0 && (
-            <button onClick={() => setShowClearModal(true)} className="text-xs font-mono text-danger">
-              clear
-            </button>
-          )}
-        </div>
-
-        {/* Day selector */}
-        <div className="flex gap-2">
-          {[
-            { label: 'Day 1', val: 1 },
-            { label: 'Day 2', val: 2 },
-            { label: 'Day 3', val: 3 },
-            { label: 'Day 4', val: 4 }
-          ].map(d => (
-            <button
-              key={d.val}
-              onClick={() => { setSelectedDayFilter(d.val); setActiveDay(d.val); }}
-              className={`px-5 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
-                (selectedDayFilter === d.val || (selectedDayFilter === 0 && activeDay === d.val))
-                  ? 'bg-ink text-paper' : 'text-ink-2'
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
-
-      </div>
-
-      {/* Sticky bar — stage + zoom */}
-      <div className="sticky top-[49px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2 flex items-center justify-between gap-3">
-        <StageSelector />
-        <div className="flex items-center gap-1 bg-paper-2 rounded-full border border-ink-2/20 px-1.5 py-1">
+      {/* Mode toggle — scrolls away */}
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setZoomIdx(Math.max(0, zoomIdx - 1))}
-            disabled={zoomIdx === 0}
-            className="p-1.5 rounded-full text-ink-2 disabled:opacity-20"
+            onClick={() => setTimetableMode('full')}
+            className={`px-5 py-2.5 rounded-full text-base font-display font-bold transition-all ${
+              timetableMode === 'full' ? 'bg-ink text-paper' : 'text-ink-2'
+            }`}
           >
-            <Minus className="w-4 h-4" />
+            Everyone
           </button>
-          <span className="text-xs font-mono text-ink-2 w-6 text-center">{['S', 'M', 'L', 'XL'][zoomIdx]}</span>
           <button
-            onClick={() => setZoomIdx(Math.min(ZOOM_LEVELS.length - 1, zoomIdx + 1))}
-            disabled={zoomIdx === ZOOM_LEVELS.length - 1}
-            className="p-1.5 rounded-full text-ink-2 disabled:opacity-20"
+            onClick={() => setTimetableMode('my-lineup')}
+            className={`px-5 py-2.5 rounded-full text-base font-display font-bold transition-all ${
+              timetableMode === 'my-lineup' ? 'bg-accent text-paper' : 'text-ink-2'
+            }`}
           >
-            <Plus className="w-4 h-4" />
+            Your Picks
+            {myFavorites.length > 0 && (
+              <span className="ml-1.5 font-mono text-sm opacity-80">{myFavorites.length}</span>
+            )}
           </button>
         </div>
+
+        {timetableMode === 'my-lineup' && myFavorites.length > 0 && (
+          <button onClick={() => setShowClearModal(true)} className="text-xs font-mono text-danger">
+            clear
+          </button>
+        )}
       </div>
+
+      {/* Sticky bar — days + stage */}
+      <div className="sticky top-0 z-40 bg-paper border-b border-ink/10 px-3 py-2 flex items-center gap-2">
+        <DayPills
+          activeDay={selectedDayFilter !== 0 ? selectedDayFilter : activeDay}
+          onDayChange={(day) => { setSelectedDayFilter(day); setActiveDay(day); }}
+        />
+
+        <div className="flex-1 min-w-0 flex justify-center">
+          <StageSelector />
+        </div>
+      </div>
+
+      {/* Clash summary banner */}
+      {timetableMode === 'my-lineup' && clashPairs.length > 0 && (
+        <button
+          onClick={handleClashTap}
+          className="w-full px-5 py-2 flex items-center gap-2 bg-danger-soft border-b border-danger/20 text-sm transition-colors active:opacity-70"
+        >
+          <span className="w-2 h-2 rounded-full bg-danger animate-pulse" />
+          <span className="font-display font-semibold text-danger">
+            {clashPairs.length} {clashPairs.length === 1 ? 'overlap' : 'overlaps'}
+          </span>
+          <span className="text-ink-2 text-xs font-mono ml-auto">tap to jump →</span>
+        </button>
+      )}
 
       {/* Grid */}
       {timetableMode === 'my-lineup' && myFavorites.length === 0 ? (
@@ -161,7 +196,7 @@ export const TimetableView: React.FC = () => {
               {/* Time header */}
               <div className="flex h-9 border-b border-ink-2/30">
                 {HOURS.map((hour, i) => (
-                  <div key={i} className="flex items-end pb-2 px-3 border-l border-ink-2/20" style={{ width: hourWidth }}>
+                  <div key={i} className="flex items-end pb-2 px-3 border-l border-ink-2/20" style={{ width: HOUR_WIDTH }}>
                     <span className="text-xs font-mono text-ink">{hour.toString().padStart(2, '0')}:00</span>
                   </div>
                 ))}
@@ -178,14 +213,13 @@ export const TimetableView: React.FC = () => {
                     </div>
                     <div className="relative" style={{ height: ROW_HEIGHT }}>
                       {HOURS.map((_, i) => (
-                        <div key={i} className="absolute top-0 bottom-0 border-l border-ink-2/10" style={{ left: i * hourWidth }} />
+                        <div key={i} className="absolute top-0 bottom-0 border-l border-ink-2/10" style={{ left: i * HOUR_WIDTH }} />
                       ))}
                       {stageSets.map((set) => (
                         <SetBlock
                           key={set.id}
                           set={set}
                           stage={stage}
-                          hourWidth={hourWidth}
                           isFavorited={favoriteIds.includes(set.id)}
                           onToggle={() => toggleFavorite(set.id)}
                           clashInfo={
@@ -195,7 +229,7 @@ export const TimetableView: React.FC = () => {
                         />
                       ))}
                       {currentMinutes >= 0 && currentMinutes <= GRID_END && (
-                        <div className="absolute top-0 bottom-0 w-0.5 bg-accent/30" style={{ left: minutesToGridX(currentMinutes, hourWidth) }} />
+                        <div className="absolute top-0 bottom-0 w-0.5 bg-accent/30" style={{ left: minutesToGridX(currentMinutes) }} />
                       )}
                     </div>
                   </div>
@@ -204,8 +238,17 @@ export const TimetableView: React.FC = () => {
             </div>
           </div>
 
-          {/* Lock screen button — bottom center when scrolling */}
-          <div className="sticky bottom-14 z-30 flex justify-center pointer-events-none mt-4">
+          {/* Floating actions — bottom */}
+          <div className="sticky bottom-14 z-30 flex items-center justify-center gap-3 pointer-events-none mt-4">
+            {isAwayFromNow && currentMinutes > 0 && currentMinutes <= GRID_END && (
+              <button
+                onClick={scrollToNow}
+                className="pointer-events-auto flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-display font-bold bg-accent/90 backdrop-blur-sm text-paper border border-accent/50 shadow-lg transition-opacity"
+              >
+                <Clock className="w-3.5 h-3.5" />
+                Now
+              </button>
+            )}
             <button
               onClick={() => setIsWallpaperModalOpen(true)}
               className="pointer-events-auto px-5 py-2.5 rounded-full text-xs font-display font-bold bg-paper-2/90 backdrop-blur-sm text-ink-2 border border-rule/50 shadow-lg hover:text-ink transition-colors"
@@ -248,13 +291,12 @@ export const TimetableView: React.FC = () => {
 interface SetBlockProps {
   set: ArtistSet;
   stage: Stage;
-  hourWidth: number;
   isFavorited: boolean;
   onToggle: () => void;
   clashInfo: ReturnType<typeof import('../utils/clashDetection').checkSetClash> | null;
 }
 
-function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: SetBlockProps) {
+function SetBlock({ set, stage, isFavorited, onToggle, clashInfo }: SetBlockProps) {
   const startMin = timeToMinutes(set.startTime);
   const endMin = timeToMinutes(set.endTime);
   const duration = endMin - startMin;
@@ -263,8 +305,8 @@ function SetBlock({ set, stage, hourWidth, isFavorited, onToggle, clashInfo }: S
   const holdTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const didHold = React.useRef(false);
 
-  const left = minutesToGridX(startMin, hourWidth);
-  const width = minutesToGridX(duration, hourWidth);
+  const left = minutesToGridX(startMin);
+  const width = minutesToGridX(duration);
   const hasClash = clashInfo?.hasClash ?? false;
 
   const handleClick = () => {

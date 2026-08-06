@@ -1,21 +1,25 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { ARTIST_SETS, STAGES } from '../data/scheduleData';
 import { useCurrentTime, useFestivalDay } from '../hooks/useCurrentTime';
 import { timeToMinutes } from '../utils/clashDetection';
 import { ArtistCard } from './ArtistCard';
 import { StageSelector } from './StageSelector';
+import { DayPills } from './DayPills';
 import { Search, X } from 'lucide-react';
 
 export const ArtistsView: React.FC = () => {
   const {
     searchQuery, setSearchQuery,
     selectedDayFilter, setSelectedDayFilter,
-    selectedStageFilter, setSelectedStageFilter
+    selectedStageFilter, setSelectedStageFilter,
+    favoriteIds
   } = useStore();
 
   const currentMinutes = useCurrentTime();
   const festivalDay = useFestivalDay();
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const filteredSets = useMemo(() => {
     return ARTIST_SETS.filter((set) => {
@@ -42,6 +46,16 @@ export const ArtistsView: React.FC = () => {
     });
   }, [festivalDay, currentMinutes]);
 
+  const upNext = useMemo(() => {
+    if (currentMinutes < 0 || !festivalDay) return [];
+    return ARTIST_SETS.filter(s => {
+      if (s.day !== festivalDay) return false;
+      const start = timeToMinutes(s.startTime);
+      const gap = start - currentMinutes;
+      return gap > 0 && gap <= 30;
+    }).sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+  }, [festivalDay, currentMinutes]);
+
   return (
     <div className="w-full pb-20">
 
@@ -49,58 +63,84 @@ export const ArtistsView: React.FC = () => {
       {playingNow.length > 0 && (
         <div className="px-5 py-3 border-b border-accent/20 bg-accent-soft/50">
           <span className="text-[10px] font-mono text-accent tracking-widest uppercase">On stage now</span>
-          <span className="text-sm font-display font-bold text-ink block mt-0.5 truncate">
-            {playingNow.map(s => s.artistName).join(' · ')}
-          </span>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-0.5">
+            {playingNow.map(s => {
+              const inLineup = favoriteIds.includes(s.id);
+              return (
+                <span key={s.id} className={`text-sm font-display font-semibold ${inLineup ? 'text-ink' : 'text-ink-2'}`}>
+                  {inLineup && <span className="text-accent mr-0.5">✓</span>}
+                  {s.artistName}
+                </span>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {/* Top section — not sticky */}
-      <div className="px-5 pt-5 pb-4">
-        <div className="flex gap-2">
-          {[
-            { label: 'All', val: 0 },
-            { label: 'Day 1', val: 1 },
-            { label: 'Day 2', val: 2 },
-            { label: 'Day 3', val: 3 },
-            { label: 'Day 4', val: 4 }
-          ].map(d => (
-            <button
-              key={d.val}
-              onClick={() => setSelectedDayFilter(d.val)}
-              className={`px-5 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
-                selectedDayFilter === d.val
-                  ? 'bg-ink text-paper' : 'text-ink-2'
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
+      {/* Up next */}
+      {upNext.length > 0 && (
+        <div className="px-5 py-3 border-b border-ink-2/15 bg-paper-2/50">
+          <span className="text-[10px] font-mono text-ink-2 tracking-widest uppercase">Starting in 30 min</span>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+            {upNext.map(s => {
+              const stage = STAGES.find(st => st.id === s.stageId);
+              const minsAway = timeToMinutes(s.startTime) - currentMinutes;
+              const inLineup = favoriteIds.includes(s.id);
+              return (
+                <span key={s.id} className={`text-sm flex items-center gap-1.5 ${inLineup ? 'text-ink' : 'text-ink-2'}`}>
+                  {inLineup && <span className="text-accent text-xs">✓</span>}
+                  <span className="font-display font-semibold">{s.artistName}</span>
+                  <span className="text-[11px] font-mono opacity-60">{minsAway}m</span>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: stage?.color }} />
+                </span>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Sticky bar — stage + search */}
-      <div className="sticky top-[49px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2 flex items-center gap-3">
-        <StageSelector />
+      {/* Sticky bar — days + stage + search */}
+      <div className="sticky top-0 z-40 bg-paper border-b border-ink/10 px-3 py-2 flex items-center gap-2 relative">
+        {!searchExpanded ? (
+          <>
+            <DayPills
+              activeDay={selectedDayFilter}
+              onDayChange={(day) => setSelectedDayFilter(day)}
+              showAll
+            />
 
-        <div className="relative flex-1 max-w-xs ml-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-2" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-2 bg-paper-2 border border-ink-2/20 rounded-full text-sm text-ink placeholder-ink-2 outline-none transition-colors focus:border-ink-2"
-          />
-          {searchQuery && (
+            <div className="flex-1 min-w-0 flex justify-center">
+              <StageSelector />
+            </div>
+
             <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-2 hover:text-ink"
+              onClick={() => setSearchExpanded(true)}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-ink bg-paper-2 border border-ink/20 shrink-0"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          </>
+        ) : (
+          <div className="flex items-center gap-2 w-full py-1">
+            <Search className="w-4 h-4 text-ink shrink-0" />
+            <input
+              autoFocus
+              type="text"
+              placeholder="SEARCH ARTISTS..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onBlur={() => { if (!searchQuery) setSearchExpanded(false); }}
+              ref={searchInputRef}
+              className="flex-1 bg-transparent text-sm font-mono uppercase tracking-wide text-ink placeholder-ink-3 outline-none"
+            />
+            <button
+              onClick={() => { setSearchQuery(''); setSearchExpanded(false); }}
+              className="p-1.5 text-ink"
             >
               <X className="w-4 h-4" />
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Count */}

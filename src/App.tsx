@@ -1,13 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { useStore } from './store/useStore';
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
 import { ArtistsView } from './components/ArtistsView';
 import { TimetableView } from './components/TimetableView';
+import { WifiOff } from 'lucide-react';
+
+function useOnlineStatus() {
+  return useSyncExternalStore(
+    (cb) => {
+      window.addEventListener('online', cb);
+      window.addEventListener('offline', cb);
+      return () => {
+        window.removeEventListener('online', cb);
+        window.removeEventListener('offline', cb);
+      };
+    },
+    () => navigator.onLine,
+    () => true,
+  );
+}
 
 export const App: React.FC = () => {
   const { activeTab } = useStore();
   const [showUpdate, setShowUpdate] = useState(false);
+  const isOnline = useOnlineStatus();
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
@@ -45,6 +62,13 @@ export const App: React.FC = () => {
           >
             Reload
           </button>
+        </div>
+      )}
+
+      {!isOnline && (
+        <div className="px-5 py-2 bg-paper-2 border-b border-rule flex items-center gap-2 relative z-10">
+          <WifiOff className="w-3.5 h-3.5 text-ink-2" />
+          <span className="text-xs text-ink-2">Offline — your lineup is saved</span>
         </div>
       )}
 
