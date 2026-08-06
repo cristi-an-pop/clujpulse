@@ -9,29 +9,23 @@ export const Header: React.FC = () => {
   const viewDay = selectedDayFilter !== 0 ? selectedDayFilter : activeDay;
 
   return (
-    <header className="sticky top-0 z-40 bg-paper/85 backdrop-blur-lg border-b border-rule/50 px-6 py-3.5">
+    <header className="sticky top-0 z-40 bg-paper/90 backdrop-blur-lg border-b border-rule/50 px-4 sm:px-6 py-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-baseline gap-3">
-          <span className="text-2xl font-display font-bold tracking-tight text-ink">
-            CLUJPULSE
-          </span>
-          <span className="text-xs font-mono text-accent tracking-wide">
-            UNTOLD '26
-          </span>
-        </div>
+        <span className="text-lg sm:text-2xl font-display font-bold tracking-tight text-ink">
+          CLUJPULSE
+        </span>
 
-        <div className="flex items-baseline gap-3">
-          {festivalDay && (
-            <span className="text-xs font-display font-bold text-success uppercase tracking-wide">
+        <div className="flex items-center gap-3">
+          {festivalDay ? (
+            <span className="text-[11px] font-mono text-success tracking-wide uppercase hidden sm:inline">
               Live · Day {festivalDay}
             </span>
-          )}
-          {!festivalDay && (
-            <span className="text-xs font-display font-bold text-ink-3 uppercase tracking-wide">
+          ) : (
+            <span className="text-[11px] font-mono text-ink-2 tracking-wide uppercase hidden sm:inline">
               Day {viewDay}
             </span>
           )}
-          <span className="text-2xl font-display font-bold text-ink tracking-tight tabular-nums">
+          <span className="text-xl sm:text-2xl font-display font-bold text-ink tabular-nums">
             {time}
           </span>
         </div>
