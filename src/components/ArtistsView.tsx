@@ -47,7 +47,7 @@ export const ArtistsView: React.FC = () => {
 
       {/* Now playing */}
       {playingNow.length > 0 && (
-        <div className="px-4 sm:px-6 py-3 border-b border-accent/20 bg-accent-soft/50">
+        <div className="px-5 py-3 border-b border-accent/20 bg-accent-soft/50">
           <span className="text-[10px] font-mono text-accent tracking-widest uppercase">On stage now</span>
           <span className="text-sm font-display font-bold text-ink block mt-0.5 truncate">
             {playingNow.map(s => s.artistName).join(' · ')}
@@ -55,58 +55,57 @@ export const ArtistsView: React.FC = () => {
         </div>
       )}
 
-      {/* Sticky toolbar */}
-      <div className="sticky top-[53px] z-30 bg-paper/95 backdrop-blur-md border-b border-rule/30 px-4 sm:px-6 py-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Days */}
-          <div className="flex gap-1">
-            {[
-              { label: 'All', val: 0 },
-              { label: '1', val: 1 },
-              { label: '2', val: 2 },
-              { label: '3', val: 3 },
-              { label: '4', val: 4 }
-            ].map(d => (
-              <button
-                key={d.val}
-                onClick={() => setSelectedDayFilter(d.val)}
-                className={`px-3 py-2 rounded-full text-sm font-display font-bold transition-all ${
-                  selectedDayFilter === d.val
-                    ? 'bg-ink text-paper' : 'text-ink-2'
-                }`}
-              >
-                {d.val === 0 ? 'All' : `Day ${d.label}`}
-              </button>
-            ))}
-          </div>
+      {/* Top section — not sticky */}
+      <div className="px-5 pt-6 pb-4 space-y-4">
+        {/* Day selector */}
+        <div className="flex gap-2">
+          {[
+            { label: 'All', val: 0 },
+            { label: 'Day 1', val: 1 },
+            { label: 'Day 2', val: 2 },
+            { label: 'Day 3', val: 3 },
+            { label: 'Day 4', val: 4 }
+          ].map(d => (
+            <button
+              key={d.val}
+              onClick={() => setSelectedDayFilter(d.val)}
+              className={`px-4 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
+                selectedDayFilter === d.val
+                  ? 'bg-paper-3 text-ink border border-ink-2/30' : 'text-ink-2'
+              }`}
+            >
+              {d.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-          {/* Stage */}
-          <StageSelector />
+      {/* Sticky bar — stage + search */}
+      <div className="sticky top-[49px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center gap-3">
+        <StageSelector />
 
-          {/* Search */}
-          <div className="relative flex-1 min-w-[120px] max-w-xs ml-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-2" />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 bg-paper-2 border border-ink-2/20 rounded-full text-sm text-ink placeholder-ink-2 outline-none transition-colors focus:border-ink-2"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-2 hover:text-ink"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+        <div className="relative flex-1 max-w-xs ml-auto">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-2" />
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-8 py-2 bg-paper-2 border border-ink-2/20 rounded-full text-sm text-ink placeholder-ink-2 outline-none transition-colors focus:border-ink-2"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-2 hover:text-ink"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Count */}
-      <div className="px-4 sm:px-6 pt-4 pb-2">
+      <div className="px-5 pt-3 pb-2">
         <span className="text-sm text-ink-2">{filteredSets.length} artists</span>
       </div>
 

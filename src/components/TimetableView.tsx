@@ -67,14 +67,14 @@ export const TimetableView: React.FC = () => {
   return (
     <div className="w-full pb-16">
 
-      {/* Sticky toolbar */}
-      <div className="sticky top-[53px] z-30 bg-paper/95 backdrop-blur-md border-b border-rule/30 px-4 sm:px-6 py-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Mode */}
-          <div className="flex items-center gap-1">
+      {/* Top section — not sticky */}
+      <div className="px-5 pt-6 pb-4 space-y-5">
+        {/* Mode toggle */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setTimetableMode('full')}
-              className={`px-4 py-2 rounded-full text-sm font-display font-bold transition-all ${
+              className={`px-5 py-2.5 rounded-full text-base font-display font-bold transition-all ${
                 timetableMode === 'full' ? 'bg-ink text-paper' : 'text-ink-2'
               }`}
             >
@@ -82,56 +82,73 @@ export const TimetableView: React.FC = () => {
             </button>
             <button
               onClick={() => setTimetableMode('my-lineup')}
-              className={`px-4 py-2 rounded-full text-sm font-display font-bold transition-all ${
+              className={`px-5 py-2.5 rounded-full text-base font-display font-bold transition-all ${
                 timetableMode === 'my-lineup' ? 'bg-accent text-paper' : 'text-ink-2'
               }`}
             >
-              Picks{myFavorites.length > 0 && ` ${myFavorites.length}`}
-            </button>
-          </div>
-
-          {/* Days */}
-          <div className="flex gap-1">
-            {[1, 2, 3, 4].map(d => (
-              <button
-                key={d}
-                onClick={() => { setSelectedDayFilter(d); setActiveDay(d); }}
-                className={`px-3 py-2 rounded-full text-sm font-display font-bold transition-all ${
-                  (selectedDayFilter === d || (selectedDayFilter === 0 && activeDay === d))
-                    ? 'bg-paper-3 text-ink' : 'text-ink-2'
-                }`}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
-
-          {/* Stage selector */}
-          <StageSelector />
-
-          {/* Zoom */}
-          <div className="flex items-center gap-0.5 ml-auto bg-paper-2 rounded-full border border-ink-2/20 px-1 py-0.5">
-            <button
-              onClick={() => setZoomIdx(Math.max(0, zoomIdx - 1))}
-              disabled={zoomIdx === 0}
-              className="p-2 rounded-full text-ink-2 disabled:opacity-20"
-            >
-              <Minus className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setZoomIdx(Math.min(ZOOM_LEVELS.length - 1, zoomIdx + 1))}
-              disabled={zoomIdx === ZOOM_LEVELS.length - 1}
-              className="p-2 rounded-full text-ink-2 disabled:opacity-20"
-            >
-              <Plus className="w-3.5 h-3.5" />
+              Your Picks
+              {myFavorites.length > 0 && (
+                <span className="ml-1.5 font-mono text-sm opacity-80">{myFavorites.length}</span>
+              )}
             </button>
           </div>
 
           {timetableMode === 'my-lineup' && myFavorites.length > 0 && (
-            <button onClick={() => setShowClearModal(true)} className="text-xs font-mono text-danger ml-2">
+            <button onClick={() => setShowClearModal(true)} className="text-xs font-mono text-danger">
               clear
             </button>
           )}
+        </div>
+
+        {/* Day selector */}
+        <div className="flex gap-2">
+          {[
+            { label: 'Day 1', val: 1 },
+            { label: 'Day 2', val: 2 },
+            { label: 'Day 3', val: 3 },
+            { label: 'Day 4', val: 4 }
+          ].map(d => (
+            <button
+              key={d.val}
+              onClick={() => { setSelectedDayFilter(d.val); setActiveDay(d.val); }}
+              className={`px-5 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
+                (selectedDayFilter === d.val || (selectedDayFilter === 0 && activeDay === d.val))
+                  ? 'bg-paper-3 text-ink border border-ink-2/30' : 'text-ink-2'
+              }`}
+            >
+              {d.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Lock screen link (desktop) */}
+        <button
+          onClick={() => setIsWallpaperModalOpen(true)}
+          className="hidden sm:flex items-center gap-2 text-sm font-display font-bold text-ink-2 hover:text-ink transition-colors"
+        >
+          Save as Lock Screen →
+        </button>
+      </div>
+
+      {/* Sticky bar — stage + zoom only */}
+      <div className="sticky top-[49px] z-30 bg-paper border-b border-ink-2/20 px-5 py-2.5 flex items-center justify-between gap-3">
+        <StageSelector />
+        <div className="flex items-center gap-1 bg-paper-2 rounded-full border border-ink-2/20 px-1.5 py-1">
+          <button
+            onClick={() => setZoomIdx(Math.max(0, zoomIdx - 1))}
+            disabled={zoomIdx === 0}
+            className="p-1.5 rounded-full text-ink-2 disabled:opacity-20"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+          <span className="text-xs font-mono text-ink-2 w-6 text-center">{['S', 'M', 'L', 'XL'][zoomIdx]}</span>
+          <button
+            onClick={() => setZoomIdx(Math.min(ZOOM_LEVELS.length - 1, zoomIdx + 1))}
+            disabled={zoomIdx === ZOOM_LEVELS.length - 1}
+            className="p-1.5 rounded-full text-ink-2 disabled:opacity-20"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -162,12 +179,10 @@ export const TimetableView: React.FC = () => {
                 const stageSets = displayedSets.filter(s => s.stageId === stage.id);
                 return (
                   <div key={stage.id} className="border-b border-ink-2/20">
-                    {/* Label */}
-                    <div className="sticky left-0 z-10 pt-2 pb-1 px-3 flex items-center gap-2" style={{ width: 'fit-content' }}>
+                    <div className="sticky left-0 z-10 pt-2.5 pb-1 px-4 flex items-center gap-2" style={{ width: 'fit-content' }}>
                       <span className="text-sm font-display font-bold" style={{ color: stage.color }}>{stage.name}</span>
                       <span className="text-[11px] font-mono text-ink-2">{stageSets.length}</span>
                     </div>
-                    {/* Blocks */}
                     <div className="relative" style={{ height: ROW_HEIGHT }}>
                       {HOURS.map((_, i) => (
                         <div key={i} className="absolute top-0 bottom-0 border-l border-ink-2/10" style={{ left: i * hourWidth }} />
@@ -196,12 +211,12 @@ export const TimetableView: React.FC = () => {
             </div>
           </div>
 
-          {/* Lock screen button — bottom floating */}
+          {/* Mobile lock screen button */}
           <button
             onClick={() => setIsWallpaperModalOpen(true)}
             className="fixed bottom-16 right-4 z-30 px-4 py-2.5 rounded-full text-xs font-display font-bold bg-paper-2 text-ink border border-rule shadow-lg sm:hidden"
           >
-            Save Lock Screen →
+            Lock Screen →
           </button>
         </div>
       )}
