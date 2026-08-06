@@ -100,28 +100,27 @@ export const ArtistsView: React.FC = () => {
       )}
 
       {/* Sticky bar — days + stage + search */}
-      <div className="sticky top-0 z-40 bg-paper border-b border-ink/10 px-3 py-2 flex items-center gap-2 relative">
+      <div className="sticky top-0 z-40 bg-paper border-b border-ink/10 px-4 py-2 relative">
         {!searchExpanded ? (
-          <>
+          <div className="flex flex-col items-center gap-2">
             <DayPills
               activeDay={selectedDayFilter}
               onDayChange={(day) => setSelectedDayFilter(day)}
               showAll
             />
 
-            <div className="flex-1 min-w-0 flex justify-center">
+            <div className="flex items-center gap-3">
               <StageSelector />
+              <button
+                onClick={() => setSearchExpanded(true)}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-ink bg-paper-2 border border-ink/20"
+              >
+                <Search className="w-4 h-4" />
+              </button>
             </div>
-
-            <button
-              onClick={() => setSearchExpanded(true)}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-ink bg-paper-2 border border-ink/20 shrink-0"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-          </>
+          </div>
         ) : (
-          <div className="flex items-center gap-2 w-full py-1">
+          <div className="flex items-center gap-2 w-full py-3">
             <Search className="w-4 h-4 text-ink shrink-0" />
             <input
               autoFocus

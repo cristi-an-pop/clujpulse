@@ -155,15 +155,12 @@ export const TimetableView: React.FC = () => {
       </div>
 
       {/* Sticky bar — days + stage */}
-      <div className="sticky top-0 z-40 bg-paper border-b border-ink/10 px-3 py-2 flex items-center gap-2">
+      <div className="sticky top-0 z-40 bg-paper border-b border-ink/10 px-4 py-2 flex flex-col items-center gap-2">
         <DayPills
           activeDay={selectedDayFilter !== 0 ? selectedDayFilter : activeDay}
           onDayChange={(day) => { setSelectedDayFilter(day); setActiveDay(day); }}
         />
-
-        <div className="flex-1 min-w-0 flex justify-center">
-          <StageSelector />
-        </div>
+        <StageSelector />
       </div>
 
       {/* Clash summary banner */}
