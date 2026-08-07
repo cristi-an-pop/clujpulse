@@ -7,6 +7,7 @@ import { timeToMinutes, doSetsOverlap, checkSetClash } from '../utils/clashDetec
 import { WallpaperExporter } from './WallpaperExporter';
 import { StageSelector } from './StageSelector';
 import { DayPills } from './DayPills';
+import { Footer } from './Footer';
 import { Modal } from './Modal';
 import { Clock } from 'lucide-react';
 
@@ -189,7 +190,12 @@ export const TimetableView: React.FC = () => {
       ) : (
         <div className="relative">
           <div ref={scrollRef} className="overflow-x-auto no-scrollbar">
-            <div style={{ width: gridWidth }}>
+            <div className="relative" style={{ width: gridWidth }}>
+              {/* Current time indicator — one continuous line */}
+              {currentMinutes >= 0 && currentMinutes <= GRID_END && (
+                <div className="absolute top-0 bottom-0 w-0.5 bg-accent/40 z-20 pointer-events-none" style={{ left: minutesToGridX(currentMinutes) }} />
+              )}
+
               {/* Time header */}
               <div className="flex h-9 border-b border-ink-2/30">
                 {HOURS.map((hour, i) => (
@@ -225,9 +231,6 @@ export const TimetableView: React.FC = () => {
                           }
                         />
                       ))}
-                      {currentMinutes >= 0 && currentMinutes <= GRID_END && (
-                        <div className="absolute top-0 bottom-0 w-0.5 bg-accent/30" style={{ left: minutesToGridX(currentMinutes) }} />
-                      )}
                     </div>
                   </div>
                 );
@@ -255,6 +258,8 @@ export const TimetableView: React.FC = () => {
           </div>
         </div>
       )}
+
+      <Footer />
 
       <WallpaperExporter
         isOpen={isWallpaperModalOpen}

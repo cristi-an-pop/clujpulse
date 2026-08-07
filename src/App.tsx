@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { useStore } from './store/useStore';
+import { useFestivalDay } from './hooks/useCurrentTime';
 import { Header } from './components/Header';
 import { Navbar } from './components/Navbar';
 import { ArtistsView } from './components/ArtistsView';
@@ -22,9 +23,17 @@ function useOnlineStatus() {
 }
 
 export const App: React.FC = () => {
-  const { activeTab } = useStore();
+  const { activeTab, setActiveDay, setSelectedDayFilter } = useStore();
   const [showUpdate, setShowUpdate] = useState(false);
   const isOnline = useOnlineStatus();
+  const festivalDay = useFestivalDay();
+
+  useEffect(() => {
+    if (festivalDay) {
+      setActiveDay(festivalDay);
+      setSelectedDayFilter(festivalDay);
+    }
+  }, [festivalDay, setActiveDay, setSelectedDayFilter]);
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;

@@ -29,8 +29,8 @@ export const Navbar: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-6 py-2 rounded-full text-sm font-display font-bold tracking-tight transition-all ${
-                    isActive ? 'bg-ink text-paper' : 'text-ink-3'
+                  className={`px-8 py-3 rounded-full text-base font-display font-bold tracking-tight transition-all ${
+                    isActive ? 'bg-ink text-paper' : 'text-ink'
                   }`}
                 >
                   {tab.label}

@@ -6,6 +6,7 @@ import { timeToMinutes } from '../utils/clashDetection';
 import { ArtistCard } from './ArtistCard';
 import { StageSelector } from './StageSelector';
 import { DayPills } from './DayPills';
+import { Footer } from './Footer';
 import { Search, X } from 'lucide-react';
 
 export const ArtistsView: React.FC = () => {
@@ -169,6 +170,8 @@ export const ArtistsView: React.FC = () => {
           ))}
         </div>
       )}
+
+      <Footer />
     </div>
   );
 };
