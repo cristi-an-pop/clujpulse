@@ -2,6 +2,12 @@
 
 Unofficial offline-first PWA companion for UNTOLD 2026. Built because the official app crashes under load and makes it impossible to spot schedule clashes.
 
+<p align="center">
+  <img src="public/screenshot-schedule.png" width="300" alt="Schedule view" />
+  &nbsp;&nbsp;
+  <img src="public/screenshot-artists.png" width="300" alt="Artists view" />
+</p>
+
 ## What it does
 
 - **Offline-first** — caches everything on first load. Add to Home Screen and it works 100% without signal at the festival.
