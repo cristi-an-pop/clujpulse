@@ -1,32 +1,40 @@
-# React + TypeScript + Vite
+# ClujPulse
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Unofficial offline-first PWA companion for UNTOLD 2026. Built because the official app crashes under load and makes it impossible to spot schedule clashes.
 
-Currently, two official plugins are available:
+## What it does
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Offline-first** — caches everything on first load. Add to Home Screen and it works 100% without signal at the festival.
+- **Horizontal schedule grid** — see all stages at once, spot overlaps instantly. Zoom in/out to fit your screen.
+- **Lineup builder** — tap artists to add them to your picks. Clash detection warns you when two sets overlap.
+- **Lock screen export** — generate a PNG wallpaper of your lineup so you don't need to unlock your phone.
+- **Real-time** — shows what's on stage right now during festival hours (Aug 6–9).
 
-## React Compiler
+No backend, no accounts, no ads. Lineup saved locally on your device.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Traction
 
-## Expanding the Oxlint configuration
+~5,000 visits on day 1 after sharing on Reddit, then 1.2–1.8k visits/day throughout the festival. Hosted on Vercel's free tier without issues.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Stack
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+React + Vite, Tailwind CSS v4, Zustand, Framer Motion, vite-plugin-pwa. Deployed on Vercel.
+
+## Run locally
+
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Update artist data
+
+```bash
+npx tsx scripts/scrape-artists.ts
+```
+
+Pulls all artists from the public UNTOLD API and writes `src/data/scheduleData.ts`.
+
+## Disclaimer
+
+This is an unofficial fan-made project. Not affiliated with or endorsed by UNTOLD Festival.
